@@ -536,6 +536,14 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
     }
 }
 
+void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
+    EVE_cmd_dl_burst(DL_COLOR_RGB | WHITE);
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
+    EVE_cmd_setbitmap_burst(addr, fmt, width, height);
+    EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
+    EVE_cmd_dl_burst(DL_END);
+}
+
 void TFT_home(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
@@ -570,6 +578,8 @@ void TFT_home(void) {
         EVE_cmd_custombutton_burst(TAG_HOME_SCHEDULEBUTTON);
 
         EVE_cmd_custombutton_burst(TAG_HOME_SETTINGSBUTTON);
+
+        EVE_cmd_bitmap_burst(MEM_PIC1, EVE_RGB565, 100, 100, 0, 0);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
