@@ -1,2 +1,4 @@
 .pio
 .vscode
+build/.ninja_log
+build/CMakeCache.txt
