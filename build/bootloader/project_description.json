@@ -1,0 +1,21 @@
+{
+    "project_name":       "bootloader",
+    "project_path":       "/Users/kevinkwon/esp/esp-idf/components/bootloader/subproject",
+    "build_dir":          "/Users/kevinkwon/Documents/PlatformIO/Projects/SmartFeeder/build/bootloader",
+    "config_file":        "/Users/kevinkwon/Documents/PlatformIO/Projects/SmartFeeder/sdkconfig",
+    "config_defaults":    "",
+    "app_elf":            "bootloader.elf",
+    "app_bin":            "bootloader.bin",
+    "git_revision":       "v4.4.2-dirty",
+    "target":             "esp32",
+    "rev":                "0",
+    "phy_data_partition": "",
+    "monitor_baud" :      "115200",
+    "monitor_toolprefix": "xtensa-esp32-elf-",
+    "config_environment" : {
+        "COMPONENT_KCONFIGS" : "/Users/kevinkwon/esp/esp-idf/components/efuse/Kconfig;/Users/kevinkwon/esp/esp-idf/components/esp32/Kconfig;/Users/kevinkwon/esp/esp-idf/components/esp_common/Kconfig;/Users/kevinkwon/esp/esp-idf/components/esp_hw_support/Kconfig;/Users/kevinkwon/esp/esp-idf/components/esp_system/Kconfig;/Users/kevinkwon/esp/esp-idf/components/freertos/Kconfig;/Users/kevinkwon/esp/esp-idf/components/hal/Kconfig;/Users/kevinkwon/esp/esp-idf/components/log/Kconfig;/Users/kevinkwon/esp/esp-idf/components/newlib/Kconfig;/Users/kevinkwon/esp/esp-idf/components/spi_flash/Kconfig",
+        "COMPONENT_KCONFIGS_PROJBUILD" : "/Users/kevinkwon/esp/esp-idf/components/bootloader/Kconfig.projbuild;/Users/kevinkwon/esp/esp-idf/components/esp_rom/Kconfig.projbuild;/Users/kevinkwon/esp/esp-idf/components/esptool_py/Kconfig.projbuild;/Users/kevinkwon/esp/esp-idf/components/partition_table/Kconfig.projbuild"
+    },
+    "build_components" : [ "bootloader", "bootloader_support", "efuse", "esp32", "esp_common", "esp_hw_support", "esp_rom", "esp_system", "esptool_py", "freertos", "hal", "log", "main", "micro-ecc", "newlib", "partition_table", "soc", "spi_flash", "xtensa", "" ],
+    "build_component_paths" : [ "/Users/kevinkwon/esp/esp-idf/components/bootloader", "/Users/kevinkwon/esp/esp-idf/components/bootloader_support", "/Users/kevinkwon/esp/esp-idf/components/efuse", "/Users/kevinkwon/esp/esp-idf/components/esp32", "/Users/kevinkwon/esp/esp-idf/components/esp_common", "/Users/kevinkwon/esp/esp-idf/components/esp_hw_support", "/Users/kevinkwon/esp/esp-idf/components/esp_rom", "/Users/kevinkwon/esp/esp-idf/components/esp_system", "/Users/kevinkwon/esp/esp-idf/components/esptool_py", "/Users/kevinkwon/esp/esp-idf/components/freertos", "/Users/kevinkwon/esp/esp-idf/components/hal", "/Users/kevinkwon/esp/esp-idf/components/log", "/Users/kevinkwon/esp/esp-idf/components/bootloader/subproject/main", "/Users/kevinkwon/esp/esp-idf/components/bootloader/subproject/components/micro-ecc", "/Users/kevinkwon/esp/esp-idf/components/newlib", "/Users/kevinkwon/esp/esp-idf/components/partition_table", "/Users/kevinkwon/esp/esp-idf/components/soc", "/Users/kevinkwon/esp/esp-idf/components/spi_flash", "/Users/kevinkwon/esp/esp-idf/components/xtensa", "" ]
+}
