@@ -464,6 +464,19 @@ void TFT_touch(void)
     }
 }
 
+void EVE_cmd_backbutton_burst(uint8_t tag_value) {
+    EVE_cmd_dl_burst(TAG(tag_value));
+    EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[tag_value], " ");
+    EVE_color_rgb_burst(WHITE);
+    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+    EVE_cmd_dl_burst(VERTEX2F(36 * 16, 236 * 16));
+    EVE_cmd_dl_burst(VERTEX2F(40 * 16, 232 * 16));
+    EVE_cmd_dl_burst(VERTEX2F(40 * 16, 240 * 16));
+    EVE_cmd_dl_burst(VERTEX2F(36 * 16, 236 * 16));
+    EVE_cmd_dl_burst(TAG(0)); /* no touch */
+}
+
 void TFT_home(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
@@ -539,13 +552,7 @@ void TFT_data(void) {
 
         EVE_cmd_fgcolor_burst(DL_CLEAR_RGB | BABY_BLUE); /* some grey */
 
-        EVE_cmd_dl_burst(TAG(TAG_DATA_BACKBUTTON));
-        EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_DATA_BACKBUTTON], "<");
-        EVE_color_rgb_burst(BLACK);
-        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
-        EVE_cmd_dl_burst(VERTEX2F(30*16, 250*16));
-        EVE_cmd_dl_burst(VERTEX2F(40*16, 250*16));
-        EVE_cmd_dl_burst(TAG(0)); /* no touch */
+        EVE_cmd_backbutton_burst(TAG_DATA_BACKBUTTON);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
@@ -575,13 +582,7 @@ void TFT_schedule(void) {
 
         EVE_cmd_fgcolor_burst(DL_CLEAR_RGB | BABY_BLUE); /* some grey */
 
-        EVE_cmd_dl_burst(TAG(TAG_SCHEDULE_BACKBUTTON));
-        EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_SCHEDULE_BACKBUTTON], "Back");
-        EVE_color_rgb_burst(BLACK);
-        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
-        EVE_cmd_dl_burst(VERTEX2F(30*16, 250*16));
-        EVE_cmd_dl_burst(VERTEX2F(40*16, 250*16));
-        EVE_cmd_dl_burst(TAG(0)); /* no touch */
+        EVE_cmd_backbutton_burst(TAG_SCHEDULE_BACKBUTTON);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
@@ -611,13 +612,7 @@ void TFT_settings(void) {
 
         EVE_cmd_fgcolor_burst(DL_CLEAR_RGB | BABY_BLUE); /* some grey */
 
-        EVE_cmd_dl_burst(TAG(TAG_SETTINGS_BACKBUTTON));
-        EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_SETTINGS_BACKBUTTON], "Back");
-        EVE_color_rgb_burst(BLACK);
-        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
-        EVE_cmd_dl_burst(VERTEX2F(30*16, 250*16));
-        EVE_cmd_dl_burst(VERTEX2F(40*16, 250*16));
-        EVE_cmd_dl_burst(TAG(0));
+        EVE_cmd_backbutton_burst(TAG_SETTINGS_BACKBUTTON);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
