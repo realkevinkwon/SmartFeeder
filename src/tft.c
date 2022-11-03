@@ -494,19 +494,21 @@ void TFT_home(void) {
             lock_delay--;
         }
 
-        EVE_cmd_fgcolor_burst(DL_CLEAR_RGB | BABY_BLUE); /* some grey */
+        EVE_cmd_fgcolor_burst(DL_CLEAR_RGB | BABY_BLUE);
 
         EVE_cmd_dl_burst(TAG(TAG_HOME_DATABUTTON)); /* assign tag-value '1' to the button that follows */
-        EVE_cmd_text_burst(20, 20, 28, 0, "Data");
-        EVE_cmd_button_burst(20, 20, 250, 30, 28, toggle_state[TAG_HOME_DATABUTTON], "Data");
+        EVE_cmd_button_burst(20, 20, 250, 30, 28, toggle_state[TAG_HOME_DATABUTTON], " ");
+        EVE_cmd_text_burst(28, 23, 28, 0, "Data");
         EVE_cmd_dl_burst(TAG(0)); /* no touch */
 
         EVE_cmd_dl_burst(TAG(TAG_HOME_SCHEDULEBUTTON)); /* assign tag-value '2' to the button that follows */
-        EVE_cmd_button_burst(20, 60, 250, 30, 28, toggle_state[TAG_HOME_SCHEDULEBUTTON], "Schedule");
+        EVE_cmd_button_burst(20, 60, 250, 30, 28, toggle_state[TAG_HOME_SCHEDULEBUTTON], " ");
+        EVE_cmd_text_burst(28, 63, 28, 0, "Schedule");
         EVE_cmd_dl_burst(TAG(0)); /* no touch */
 
         EVE_cmd_dl_burst(TAG(TAG_HOME_SETTINGSBUTTON)); /* assign tag-value '3' to the button that follows */
-        EVE_cmd_button_burst(20, 100, 250, 30, 28, toggle_state[TAG_HOME_SETTINGSBUTTON], "Settings");
+        EVE_cmd_button_burst(20, 100, 250, 30, 28, toggle_state[TAG_HOME_SETTINGSBUTTON], " ");
+        EVE_cmd_text_burst(28, 103, 28, 0, "Settings");
         EVE_cmd_dl_burst(TAG(0)); /* no touch */
 
         EVE_cmd_dl_burst(DL_DISPLAY);
@@ -538,7 +540,11 @@ void TFT_data(void) {
         EVE_cmd_fgcolor_burst(DL_CLEAR_RGB | BABY_BLUE); /* some grey */
 
         EVE_cmd_dl_burst(TAG(TAG_DATA_BACKBUTTON));
-        EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_DATA_BACKBUTTON], "Back");
+        EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_DATA_BACKBUTTON], "<");
+        EVE_color_rgb_burst(BLACK);
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+        EVE_cmd_dl_burst(VERTEX2F(30*16, 250*16));
+        EVE_cmd_dl_burst(VERTEX2F(40*16, 250*16));
         EVE_cmd_dl_burst(TAG(0)); /* no touch */
 
         EVE_cmd_dl_burst(DL_DISPLAY);
@@ -571,6 +577,10 @@ void TFT_schedule(void) {
 
         EVE_cmd_dl_burst(TAG(TAG_SCHEDULE_BACKBUTTON));
         EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_SCHEDULE_BACKBUTTON], "Back");
+        EVE_color_rgb_burst(BLACK);
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+        EVE_cmd_dl_burst(VERTEX2F(30*16, 250*16));
+        EVE_cmd_dl_burst(VERTEX2F(40*16, 250*16));
         EVE_cmd_dl_burst(TAG(0)); /* no touch */
 
         EVE_cmd_dl_burst(DL_DISPLAY);
@@ -603,6 +613,10 @@ void TFT_settings(void) {
 
         EVE_cmd_dl_burst(TAG(TAG_SETTINGS_BACKBUTTON));
         EVE_cmd_button_burst(20, 220, 60, 30, 28, toggle_state[TAG_SETTINGS_BACKBUTTON], "Back");
+        EVE_color_rgb_burst(BLACK);
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+        EVE_cmd_dl_burst(VERTEX2F(30*16, 250*16));
+        EVE_cmd_dl_burst(VERTEX2F(40*16, 250*16));
         EVE_cmd_dl_burst(TAG(0));
 
         EVE_cmd_dl_burst(DL_DISPLAY);
