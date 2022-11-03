@@ -468,6 +468,11 @@ void TFT_touch(void)
 #define HOME_BUTTON_HEIGHT 110
 #define HOME_BUTTON_X 20
 #define HOME_BUTTON_Y 60
+#define DIGIT_WIDTH 16
+#define CLOCK_X1 340
+#define CLOCK_X2 CLOCK_X1 + 38
+#define CLOCK_X3 CLOCK_X2 + 40
+#define CLOCK_Y 2
 #define MENU_FONT 28
 #define TIME_FONT 30
 
@@ -478,11 +483,12 @@ void EVE_cmd_statusbar_burst(void) {
     EVE_cmd_dl_burst(VERTEX2F(0 * 16, 0 * 16));
     EVE_cmd_dl_burst(VERTEX2F(480 * 16, 40 * 16));
     EVE_color_rgb_burst(WHITE);
-    EVE_cmd_number_burst(383, 3, TIME_FONT, 0, 0);
-    EVE_cmd_number_burst(400, 3, TIME_FONT, 0, 9);
-    EVE_cmd_text_burst(422, 4, 24, 0, ":");
-    EVE_cmd_number_burst(433, 3, TIME_FONT, 0, 4);
-    EVE_cmd_number_burst(450, 3, TIME_FONT, 0, 3);
+    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, TIME_FONT, 0, 0);
+    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 9);
+    EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y + 1, 24, 0, ":");
+    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, TIME_FONT, 0, 2);
+    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 8);
+    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, TIME_FONT, 0, "PM");
 }
 
 void EVE_cmd_custombutton_burst(uint8_t tag_value) {
