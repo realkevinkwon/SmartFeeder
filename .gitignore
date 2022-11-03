@@ -3,3 +3,4 @@
 build/.ninja_log
 build/CMakeCache.txt
 .DS_Store
+build/.DS_Store
