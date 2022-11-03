@@ -54,9 +54,9 @@
 #define BLACK   0x000000UL
 
 /* memory-map defines */
-#define MEM_FONT 0x000f7e00 /* the .xfont file for the UTF-8 font is copied here */
-#define MEM_LOGO 0x000f8000 /* start-address of logo, needs 6272 bytes of memory */
-#define MEM_PIC1 0x000fa000 /* start of 100x100 pixel test image, ARGB565, needs 20000 bytes of memory */
+#define MEM_PIC_WIFI 0x00f5000
+#define MEM_PIC_STAR 0x000fa000 /* start of 100x100 pixel test image, ARGB565, needs 20000 bytes of memory */
+
 
 #define DISPLAY_ORIENTATION 0
 
@@ -299,11 +299,11 @@ void initStaticBackground(void)
     EVE_cmd_dl(DL_END);
 
     /* display the logo */
-    EVE_cmd_dl(DL_COLOR_RGB | WHITE);
-    EVE_cmd_dl(DL_BEGIN | EVE_BITMAPS);
-    EVE_cmd_setbitmap(MEM_LOGO, EVE_ARGB1555, 56, 56);
-    EVE_cmd_dl(VERTEX2F(EVE_HSIZE - 58, 5));
-    EVE_cmd_dl(DL_END);
+    // EVE_cmd_dl(DL_COLOR_RGB | WHITE);
+    // EVE_cmd_dl(DL_BEGIN | EVE_BITMAPS);
+    // EVE_cmd_setbitmap(MEM_LOGO, EVE_ARGB1555, 56, 56);
+    // EVE_cmd_dl(VERTEX2F(EVE_HSIZE - 58, 5));
+    // EVE_cmd_dl(DL_END);
 
     /* draw a black line to separate things */
     EVE_cmd_dl(DL_COLOR_RGB | BLACK);
@@ -338,6 +338,10 @@ void initStaticBackground(void)
     EVE_execute_cmd();
 }
 
+void EVE_cmd_loadimages(void) {
+    EVE_cmd_loadimage(MEM_PIC_STAR, EVE_OPT_NODL, pic, sizeof(pic));
+    EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi, sizeof(pic_wifi));
+}
 
 void TFT_init(void)
 {
@@ -378,8 +382,8 @@ void TFT_init(void)
 
 #endif /* TEST_UTF8 */
 
-        EVE_cmd_inflate(MEM_LOGO, logo, sizeof(logo)); /* load logo into gfx-memory and de-compress it */
-        EVE_cmd_loadimage(MEM_PIC1, EVE_OPT_NODL, pic, sizeof(pic));
+        // EVE_cmd_inflate(MEM_LOGO, logo, sizeof(logo)); /* load logo into gfx-memory and de-compress it */
+        EVE_cmd_loadimages();
         
         EVE_cmd_setrotate(DISPLAY_ORIENTATION);
 
@@ -579,7 +583,8 @@ void TFT_home(void) {
 
         EVE_cmd_custombutton_burst(TAG_HOME_SETTINGSBUTTON);
 
-        EVE_cmd_bitmap_burst(MEM_PIC1, EVE_RGB565, 100, 100, 0, 0);
+        EVE_cmd_bitmap_burst(MEM_PIC_STAR, EVE_RGB565, 100, 100, 0, 0);
+        EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_RGB565, 100, 100, 100, 0);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
