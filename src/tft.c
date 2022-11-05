@@ -57,7 +57,6 @@
 #define MEM_PIC_WIFI 0x00f5000
 #define MEM_PIC_STAR 0x000fa000 /* start of 100x100 pixel test image, ARGB565, needs 20000 bytes of memory */
 
-
 #define DISPLAY_ORIENTATION 0
 
 #define LOCK_DELAY 10
@@ -353,12 +352,14 @@ void TFT_init(void)
         }
 
         EVE_memWrite8(REG_PWM_DUTY, 0x30);  /* setup backlight, range is from 0 = off to 0x80 = max */
+
         EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0 << 16);
         EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 1 << 16);
         // EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0 << 16);
         EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 1 << 16);
         EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0 << 16);
         // EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0 << 16);
+
         touch_calibrate();
 
 #if (TEST_UTF8 != 0) && (EVE_GEN > 2)   /* we need a BT81x for this */
@@ -541,7 +542,7 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
 }
 
 void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
-    EVE_cmd_dl_burst(DL_COLOR_RGB | WHITE);
+    EVE_cmd_dl_burst(DL_CLEAR_RGB | WHITE);
     EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
     EVE_cmd_setbitmap_burst(addr, fmt, width, height);
     EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
