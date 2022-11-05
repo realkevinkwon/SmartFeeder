@@ -1,6 +1,5 @@
 .pio
 .vscode
-build/.ninja_log
-build/CMakeCache.txt
+build
 .DS_Store
 build/.DS_Store
