@@ -53,9 +53,6 @@
 #define WHITE   0xffffffUL
 #define BLACK   0x000000UL
 
-/* memory-map defines */
-#define MEM_PIC_WIFI 0x00f5000
-#define MEM_PIC_STAR 0x000fa000 /* start of 100x100 pixel test image, ARGB565, needs 20000 bytes of memory */
 
 #define DISPLAY_ORIENTATION 0
 
@@ -229,7 +226,7 @@ void touch_calibrate(void)
 
 /* activate this if you are using a module for the first time or if you need to re-calibrate it */
 /* write down the numbers on the screen and either place them in one of the pre-defined blocks above or make a new block */
-#if 0
+#if 1
     /* calibrate touch and displays values to screen */
     EVE_cmd_dl(CMD_DLSTART);
     EVE_cmd_dl(DL_CLEAR_RGB | BLACK);
@@ -337,9 +334,11 @@ void initStaticBackground(void)
     EVE_execute_cmd();
 }
 
+/* memory-map defines */
+#define MEM_PIC_WIFI 0x000f0000
+
 void EVE_cmd_loadimages(void) {
-    EVE_cmd_loadimage(MEM_PIC_STAR, EVE_OPT_NODL, pic, sizeof(pic));
-    EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi, sizeof(pic_wifi));
+    EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi_32, sizeof(pic_wifi_32));
 }
 
 void TFT_init(void)
@@ -353,14 +352,22 @@ void TFT_init(void)
 
         EVE_memWrite8(REG_PWM_DUTY, 0x30);  /* setup backlight, range is from 0 = off to 0x80 = max */
 
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0 << 16);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 1 << 16);
+        // EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0 << 16);
+        // EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 1 << 16);
         // EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0 << 16);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 1 << 16);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0 << 16);
+        // EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 1 << 16);
+        // EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0 << 16);
         // EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0 << 16);
 
-        touch_calibrate();
+        // touch_calibrate();   // use this to get touch transform values
+
+        EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00000CC1);
+        EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000FE4c);
+        EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFF6BA43);
+        EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x000115DF);
+        EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0xFFFFF849);
+        EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF8DE4B);
+
 
 #if (TEST_UTF8 != 0) && (EVE_GEN > 2)   /* we need a BT81x for this */
     #if 0
@@ -542,7 +549,6 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
 }
 
 void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
-    EVE_cmd_dl_burst(DL_CLEAR_RGB | WHITE);
     EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
     EVE_cmd_setbitmap_burst(addr, fmt, width, height);
     EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
@@ -578,14 +584,14 @@ void TFT_home(void) {
 
         EVE_cmd_statusbar_burst();
 
+        EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, 32, 32, 10, 5);
+
         EVE_cmd_custombutton_burst(TAG_HOME_DATABUTTON);
 
         EVE_cmd_custombutton_burst(TAG_HOME_SCHEDULEBUTTON);
 
         EVE_cmd_custombutton_burst(TAG_HOME_SETTINGSBUTTON);
 
-        EVE_cmd_bitmap_burst(MEM_PIC_STAR, EVE_RGB565, 100, 100, 0, 0);
-        EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_RGB565, 100, 100, 100, 0);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
