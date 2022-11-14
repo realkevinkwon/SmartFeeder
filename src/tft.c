@@ -489,11 +489,17 @@ void TFT_touch(void)
 #define TIME_FONT 30
 
 void EVE_cmd_statusbar_burst(void) {
+    // status bar background
     EVE_cmd_dl_burst(LINE_WIDTH(1 * 16));
     EVE_color_rgb_burst(BABY_BLUE);
     EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
     EVE_cmd_dl_burst(VERTEX2F(0 * 16, 0 * 16));
     EVE_cmd_dl_burst(VERTEX2F(480 * 16, 40 * 16));
+
+    // Wi-Fi symbol
+    EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, 32, 32, 10, 5);
+
+    // clock
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, TIME_FONT, 0, 0);
     EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 9);
@@ -583,8 +589,6 @@ void TFT_home(void) {
         }
 
         EVE_cmd_statusbar_burst();
-
-        EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, 32, 32, 10, 5);
 
         EVE_cmd_custombutton_burst(TAG_HOME_DATABUTTON);
 
