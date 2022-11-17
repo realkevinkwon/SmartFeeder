@@ -488,25 +488,92 @@ void TFT_touch(void)
 #define MENU_FONT 28
 #define TIME_FONT 30
 
+void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
+    EVE_cmd_setbitmap_burst(addr, fmt, width, height);
+    EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
+    EVE_cmd_dl_burst(DL_END);
+}
+
 void EVE_cmd_statusbar_burst(void) {
     // status bar background
-    EVE_cmd_dl_burst(LINE_WIDTH(1 * 16));
+    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
     EVE_color_rgb_burst(BABY_BLUE);
     EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
     EVE_cmd_dl_burst(VERTEX2F(0 * 16, 0 * 16));
     EVE_cmd_dl_burst(VERTEX2F(480 * 16, 40 * 16));
 
     // Wi-Fi symbol
+    EVE_color_rgb_burst(WHITE);
     EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, 32, 32, 10, 5);
 
     // clock
-    EVE_color_rgb_burst(WHITE);
     EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, TIME_FONT, 0, 0);
     EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 9);
     EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y + 1, 24, 0, ":");
     EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, TIME_FONT, 0, 2);
     EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 8);
     EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, TIME_FONT, 0, "PM");
+}
+
+// location of bottom-left of graph on the LCD
+#define GRAPH_X_BASE 250
+#define GRAPH_Y_BASE 200
+
+// with scale set to 1, each unit corresponds to 1 pixel
+#define GRAPH_X_SCALE 1
+#define GRAPH_Y_SCALE 1
+
+// length of the x and y axes
+#define GRAPH_X_LEN 200
+#define GRAPH_Y_LEN 150
+
+// interval between gridlines
+#define GRAPH_X_INTERVAL GRAPH_X_SCALE * 50
+#define GRAPH_Y_INTERVAL GRAPH_Y_SCALE * 50
+
+void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+    EVE_color_rgb_burst(COLOR_RGB(100,100,100));
+    EVE_cmd_dl_burst(LINE_WIDTH(8));
+
+    // draw the x-axis
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, GRAPH_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, GRAPH_Y_BASE * 16));
+
+    // draw the y-axis
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, GRAPH_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
+
+    // draw horizontal gridlines
+    EVE_color_rgb_burst(COLOR_RGB(200,200,200));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE - GRAPH_Y_INTERVAL) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_Y_BASE - GRAPH_Y_INTERVAL) * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE - 2 * GRAPH_Y_INTERVAL) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_Y_BASE - 2 * GRAPH_Y_INTERVAL) * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE -  3 * GRAPH_Y_INTERVAL) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_Y_BASE - 3 * GRAPH_Y_INTERVAL) * 16));
+
+    // draw vertical gridlines
+    EVE_color_rgb_burst(COLOR_RGB(200,200,200));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_INTERVAL) * 16, GRAPH_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_INTERVAL) * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 2 * GRAPH_X_INTERVAL) * 16, GRAPH_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 2 * GRAPH_X_INTERVAL) * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 3 * GRAPH_X_INTERVAL) * 16, GRAPH_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 3 * GRAPH_X_INTERVAL) * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
+
+    // plot data
+    EVE_color_rgb_burst(BLACK);
+    EVE_cmd_dl_burst(LINE_WIDTH(12));
+    for (int i = 0; i < (num_points - 1); i++) {
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + x_data[i]) * 16, (GRAPH_Y_BASE - y_data[i]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + x_data[i+1]) * 16, (GRAPH_Y_BASE - y_data[i+1]) * 16));
+    }
 }
 
 void EVE_cmd_custombutton_burst(uint8_t tag_value) {
@@ -554,13 +621,6 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
     }
 }
 
-void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
-    EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
-    EVE_cmd_setbitmap_burst(addr, fmt, width, height);
-    EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
-    EVE_cmd_dl_burst(DL_END);
-}
-
 void TFT_home(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
@@ -596,13 +656,16 @@ void TFT_home(void) {
 
         EVE_cmd_custombutton_burst(TAG_HOME_SETTINGSBUTTON);
 
-
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
         EVE_end_cmd_burst();
         while (EVE_busy());
     }
 }
+
+uint16_t num_points = 8;
+int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 
 void TFT_data(void) {
     if (tft_active != 0) {
@@ -624,6 +687,8 @@ void TFT_data(void) {
         }
 
         EVE_cmd_statusbar_burst();
+
+        EVE_cmd_display_graph_burst(x_data, y_data, num_points);
 
         EVE_cmd_custombutton_burst(TAG_DATA_BACKBUTTON);
 
