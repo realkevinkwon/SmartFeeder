@@ -532,20 +532,20 @@ void EVE_cmd_statusbar_burst(void) {
 #define GRAPH_X_INTERVAL GRAPH_X_SCALE * 50
 #define GRAPH_Y_INTERVAL GRAPH_Y_SCALE * 50
 
-int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
-    int16_t max_value = arr[0];
-    for (int i = 1; i < num_points; i++) {
-        max_value = arr[i] > max_value ? arr[i] : max_value;
-    }
-    return max_value;
-}
-
 int16_t getMinValue(int16_t* arr, uint16_t num_points) {
     int16_t min_value = arr[0];
     for (int i = 0; i < num_points; i++) {
         min_value = arr[i] < min_value ? arr[i] : min_value;
     }
     return min_value;
+}
+
+int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
+    int16_t max_value = arr[0];
+    for (int i = 1; i < num_points; i++) {
+        max_value = arr[i] > max_value ? arr[i] : max_value;
+    }
+    return max_value;
 }
 
 void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
