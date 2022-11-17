@@ -517,8 +517,8 @@ void EVE_cmd_statusbar_burst(void) {
 }
 
 // location of bottom-left of graph on the LCD
-#define GRAPH_X_BASE 250
-#define GRAPH_Y_BASE 200
+#define GRAPH_X_BASE 200
+#define GRAPH_Y_BASE 220
 
 // with scale set to 1, each unit corresponds to 1 pixel
 #define GRAPH_X_SCALE 1
@@ -546,6 +546,11 @@ int16_t getMinValue(int16_t* arr, uint16_t num_points) {
         min_value = arr[i] < min_value ? arr[i] : min_value;
     }
     return min_value;
+}
+
+void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+
+    return;
 }
 
 void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
@@ -680,6 +685,11 @@ void TFT_home(void) {
 }
 
 uint16_t num_points = 8;
+/* 
+    data MUST be in order:
+    x_data = {x_0, x_1, x_2,...,x_i, x_i+1,...}
+    y_data = {y_0, y_1, y_2,...,y_i, y_i+1,...}
+*/
 int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 
