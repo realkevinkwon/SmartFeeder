@@ -9,9 +9,6 @@
 
 #define LED_BUILTIN GPIO_NUM_2
 
-#define MOTOR_PINS ((1<<GPIO_NUM_2) | (1<<GPIO_NUM_4) | (1<<GPIO_NUM_16) | (1<<GPIO_NUM_17))
-#define GPIO_OUTPUT_PIN_SEL MOTOR_PINS
-
 void app_main() {
     uint32_t current_millis;
     uint32_t previous_millis = 0;
@@ -31,6 +28,7 @@ void app_main() {
 
     while(1)
     {
+
        	current_millis = (uint32_t) (esp_timer_get_time() / 1000ULL);
 
         if((current_millis - previous_millis) > 4) /* execute the code every 5 milli-seconds */
