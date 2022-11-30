@@ -394,8 +394,6 @@ void TFT_init(void)
         EVE_cmd_loadimages();
         
         EVE_cmd_setrotate(DISPLAY_ORIENTATION);
-
-        initStaticBackground();
     }
 }
 
