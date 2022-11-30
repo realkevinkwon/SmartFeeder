@@ -4,6 +4,8 @@
 #include <nvs.h>
 #include <nvs_flash.h>
 
+void mem_init(void);
+
 void mem_write(void);
 
 void mem_read(void);
