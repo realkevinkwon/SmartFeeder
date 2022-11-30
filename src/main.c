@@ -15,9 +15,6 @@
 #include "load_cell.h"
 #include "ultrasonic.h"
 
-#define LOAD_CELL_NAMESPACE "load_cell_data"
-#define ULTRASONIC_NAMESPACE "ultrasonic_data"
-
 void app_main() {
     uint32_t current_millis;
     uint32_t previous_millis = 0;
