@@ -2,6 +2,8 @@
 #include "driver/gpio.h"
 #include "hx711.h"
 #include "memory.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 static hx711_t dev = {
     .dout = GPIO_NUM_18,
@@ -30,7 +32,7 @@ void load_cell_write(void) {
             continue;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 }
 
