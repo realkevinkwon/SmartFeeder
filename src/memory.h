@@ -1,6 +1,9 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
+#include <nvs.h>
+#include <nvs_flash.h>
+
 void mem_write(void);
 
 void mem_read(void);
