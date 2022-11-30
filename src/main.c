@@ -8,7 +8,17 @@
 #include "EVE_commands.h"
 #include "tft.h"
 
+// libaries for reading/writing internal flash memory
+#include "memory.h"
+
+// libaries for load cells
+#include "load_cell.h"
+#include "ultrasonic.h"
+
 #define LED_BUILTIN GPIO_NUM_2
+
+#define LOAD_CELL_NAMESPACE "load_cell_data"
+#define ULTRASONIC_NAMESPACE "ultrasonic_data"
 
 void app_main() {
     uint32_t current_millis;
@@ -24,8 +34,9 @@ void app_main() {
     io_cfg.pin_bit_mask = BIT(LED_BUILTIN);
     gpio_config(&io_cfg);
 
-    EVE_init_spi();
-    TFT_init();
+    EVE_init_spi();     // initialize LCD as SPI device
+    TFT_init();         // run FT813 (LCD graphics chip) initialization sequence
+    mem_init();         // initialize read/write for internal memory
 
     while(1)
     {
