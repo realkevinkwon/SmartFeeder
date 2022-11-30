@@ -6,9 +6,9 @@
 
 void mem_init(void);
 
-void mem_write(const char* namespace, uint32_t* data);
+void mem_write(const char* namespace, uint32_t* new_data, size_t length);
 
 // data is malloced within function and must freed from calling function
-void mem_read(const char* namespace, uint32_t* data);
+uint32_t* mem_read(const char* namespace, size_t* length);
 
 #endif /* __MEMORY_H__ */
