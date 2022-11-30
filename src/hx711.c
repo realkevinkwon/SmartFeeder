@@ -37,8 +37,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_timer.h>
-#include <ets_sys.h>
-#include <esp_idf_lib_helpers.h>
+// #include <ets_sys.h>
+// #include <esp_idf_lib_helpers.h>
 #include "hx711.h"
 
 #define CHECK(x) do { esp_err_t __; if ((__ = x) != ESP_OK) return __; } while (0)
