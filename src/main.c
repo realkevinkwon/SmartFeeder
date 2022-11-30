@@ -3,6 +3,7 @@
 #include "driver/gpio.h"
 #include "soc/rtc_wdt.h"
 
+// libraries for the LCD
 #include "EVE_target.h"
 #include "EVE_commands.h"
 #include "tft.h"
