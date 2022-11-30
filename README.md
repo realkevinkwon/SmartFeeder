@@ -21,7 +21,9 @@ def app_main():
         # runs every 5ms
         if time_passed == 5ms:
             TFT_touch()
-            TFT_display()
+            # runs every 20ms
+            if time_passed == 20ms:
+                TFT_display()
 
         # write data from ultrasonic sensors and load cells to internal memory
         if time.minutes in ['00','15','30','45']:
