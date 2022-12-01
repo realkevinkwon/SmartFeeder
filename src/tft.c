@@ -38,9 +38,11 @@
 
 
 #define TEST_UTF8 0
+#define DISPLAY_ORIENTATION 0
+#define MEM_DL_STATIC (EVE_RAM_G_SIZE - 4096) /* 0xff000 - start-address of the static part of the display-list, upper 4k of gfx-mem */
 
 
-/* some pre-definded colors */
+/* === pre-defined colors === */
 #define RED     0xff0000UL
 #define ORANGE  0xffa500UL
 #define GREEN   0x00ff00UL
@@ -52,37 +54,122 @@
 #define PURPLE  0x800080UL
 #define WHITE   0xffffffUL
 #define BLACK   0x000000UL
+/* ========================== */
 
 
-#define DISPLAY_ORIENTATION 0
+/* === delay values for touch === */
+#define DELAY_BUTTON 10
+#define DELAY_KEY 2
+/* ============================== */
 
-#define LOCK_DELAY 10
 
+/* === screenstate values === */
 #define SCREENSTATE_HOME 0
 #define SCREENSTATE_DATA 1
 #define SCREENSTATE_SCHEDULE 2
 #define SCREENSTATE_SETTINGS 3
+/* ========================== */
 
+
+/* === tag values for touch === */
+/* home screen */
 #define TAG_HOME_DATABUTTON 1
 #define TAG_HOME_SCHEDULEBUTTON 2
 #define TAG_HOME_SETTINGSBUTTON 3
 
+/* data screen */
 #define TAG_DATA_BACKBUTTON 4
 
+/* schedule screen */
 #define TAG_SCHEDULE_BACKBUTTON 5
+#define TAG_SCHEDULE_KEY0 6
+#define TAG_SCHEDULE_KEY1 7
+#define TAG_SCHEDULE_KEY2 8
+#define TAG_SCHEDULE_KEY3 9
+#define TAG_SCHEDULE_KEY4 10
+#define TAG_SCHEDULE_KEY5 11
+#define TAG_SCHEDULE_KEY6 12
+#define TAG_SCHEDULE_KEY7 13
+#define TAG_SCHEDULE_KEY8 14
+#define TAG_SCHEDULE_KEY9 15
 
-#define TAG_SETTINGS_BACKBUTTON 6
+/* settings screen */
+#define TAG_SETTINGS_BACKBUTTON 16
+/* ======================== */
 
-#define MEM_DL_STATIC (EVE_RAM_G_SIZE - 4096) /* 0xff000 - start-address of the static part of the display-list, upper 4k of gfx-mem */
 
+/* === macros for drawing graphs === */
+// location of bottom-left of graph on the LCD
+#define GRAPH_X_BASE 200
+#define GRAPH_Y_BASE 220
+
+// with scale set to 1, each unit corresponds to 1 pixel
+#define GRAPH_X_SCALE 1
+#define GRAPH_Y_SCALE 1
+
+// length of the x and y axes
+#define GRAPH_X_LEN 200
+#define GRAPH_Y_LEN 150
+
+// interval between gridlines
+#define GRAPH_X_INTERVAL GRAPH_X_SCALE * 50
+#define GRAPH_Y_INTERVAL GRAPH_Y_SCALE * 50
+/* ================================= */
+
+
+/* === dimensions and locations of on-screen elements === */
+/* home screen buttons */
+#define HOME_BUTTON_WIDTH 110
+#define HOME_BUTTON_HEIGHT 110
+#define HOME_BUTTON_X 20
+#define HOME_BUTTON_Y 60
+
+/* digital clock */
+#define DIGIT_WIDTH 16
+#define CLOCK_X1 340
+#define CLOCK_X2 CLOCK_X1 + 38
+#define CLOCK_X3 CLOCK_X2 + 40
+#define CLOCK_Y 2
+/* ====================================================== */
+
+
+/* === fonts === */
+#define FONT_PRIMARY 28
+#define FONT_TIME 30
+/* ============= */
+
+
+/* === memory-map addresses for bitmaps === */
+#define MEM_PIC_WIFI 0x000f0000
+/* ======================================== */
+
+
+/* === general variables === */
 uint32_t num_dl_static; /* amount of bytes in the static part of our display-list */
 uint8_t tft_active = 0;
 uint16_t num_profile_a, num_profile_b;
+uint16_t display_list_size = 0;
+/* ========================= */
 
-uint16_t toggle_state[255];    // holds toggle states for various ui elements
 
-#define LAYOUT_Y1 66
+/* === variables for touch === */
+uint16_t toggle_state[255];                 // holds toggle states for various ui elements
+uint8_t screen_state = SCREENSTATE_HOME;    // holds which screen should be displayed
+uint16_t lock_delay = 0;                    // delay for buttons
+uint8_t toggle_lock = 0;                    // allows only one touch target to be activated at a time
+/* =========================== */
 
+
+/* === variables for drawing graphs === */
+uint16_t num_points = 8;
+/* 
+    data MUST be in order:
+    x_data = {x_0, x_1, x_2,...,x_i, x_i+1,...}
+    y_data = {y_0, y_1, y_2,...,y_i, y_i+1,...}
+*/
+int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
+/* ============= */
 
 void touch_calibrate(void)
 {
@@ -274,69 +361,6 @@ void touch_calibrate(void)
 #endif
 }
 
-
-void initStaticBackground(void)
-{
-    EVE_cmd_dl(CMD_DLSTART); /* Start the display list */
-
-    EVE_cmd_dl(TAG(0)); /* do not use the following objects for touch-detection */
-
-    EVE_cmd_bgcolor(0x00c0c0c0); /* light grey */
-
-    EVE_cmd_dl(VERTEX_FORMAT(0)); /* reduce precision for VERTEX2F to 1 pixel instead of 1/16 pixel default */
-
-    /* draw a rectangle on top */
-    EVE_cmd_dl(DL_BEGIN | EVE_RECTS);
-    EVE_cmd_dl(LINE_WIDTH(1*16)); /* size is in 1/16 pixel */
-
-    EVE_cmd_dl(DL_COLOR_RGB | BABY_BLUE);
-    EVE_cmd_dl(VERTEX2F(0,0));
-    EVE_cmd_dl(VERTEX2F(EVE_HSIZE,LAYOUT_Y1-2));
-    EVE_cmd_dl(DL_END);
-
-    /* display the logo */
-    // EVE_cmd_dl(DL_COLOR_RGB | WHITE);
-    // EVE_cmd_dl(DL_BEGIN | EVE_BITMAPS);
-    // EVE_cmd_setbitmap(MEM_LOGO, EVE_ARGB1555, 56, 56);
-    // EVE_cmd_dl(VERTEX2F(EVE_HSIZE - 58, 5));
-    // EVE_cmd_dl(DL_END);
-
-    /* draw a black line to separate things */
-    EVE_cmd_dl(DL_COLOR_RGB | BLACK);
-    EVE_cmd_dl(DL_BEGIN | EVE_LINES);
-    EVE_cmd_dl(VERTEX2F(0,LAYOUT_Y1-2));
-    EVE_cmd_dl(VERTEX2F(EVE_HSIZE,LAYOUT_Y1-2));
-    EVE_cmd_dl(DL_END);
-
-#if (TEST_UTF8 != 0) && (EVE_GEN > 2)
-    EVE_cmd_setfont2(12,MEM_FONT,32); /* assign bitmap handle to a custom font */
-    EVE_cmd_text(EVE_HSIZE/2, 15, 12, EVE_OPT_CENTERX, "EVE Demo");
-#else
-    EVE_cmd_text(EVE_HSIZE/2, 15, 29, EVE_OPT_CENTERX, "EVE Demo");
-#endif
-
-    /* add the static text to the list */
-#if defined (EVE_DMA)
-    EVE_cmd_text(10, EVE_VSIZE - 65, 26, 0, "Bytes:");
-#endif
-    EVE_cmd_text(10, EVE_VSIZE - 50, 26, 0, "DL-size:");
-    EVE_cmd_text(10, EVE_VSIZE - 35, 26, 0, "Time1:");
-    EVE_cmd_text(10, EVE_VSIZE - 20, 26, 0, "Time2:");
-
-    EVE_cmd_text(105, EVE_VSIZE - 35, 26, 0, "us");
-    EVE_cmd_text(105, EVE_VSIZE - 20, 26, 0, "us");
-
-    EVE_execute_cmd();
-
-    num_dl_static = EVE_memRead16(REG_CMD_DL);
-
-    EVE_cmd_memcpy(MEM_DL_STATIC, EVE_RAM_DL, num_dl_static);
-    EVE_execute_cmd();
-}
-
-/* memory-map defines */
-#define MEM_PIC_WIFI 0x000f0000
-
 void EVE_cmd_loadimages(void) {
     EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi_32, sizeof(pic_wifi_32));
 }
@@ -368,40 +392,12 @@ void TFT_init(void)
         EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0xFFFFF849);
         EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF8DE4B);
 
-
-#if (TEST_UTF8 != 0) && (EVE_GEN > 2)   /* we need a BT81x for this */
-    #if 0
-        /* this is only needed once to transfer the flash-image to the external flash */
-        uint32_t datasize;
-
-        EVE_cmd_inflate(0, flash, sizeof(flash)); /* de-compress flash-image to RAM_G */
-        datasize = EVE_cmd_getptr(); /* we unpacked to RAM_G address 0x0000, so the first address after the unpacked data also is the size */
-        EVE_cmd_flashupdate(0,0,4096); /* write blob first */
-        if (E_OK == EVE_init_flash())
-        {
-            EVE_cmd_flashupdate(0,0,(datasize|4095)+1); /* size must be a multiple of 4096, so set the lower 12 bits and add 1 */
-        }
-    #endif
-
-    if (E_OK == EVE_init_flash())
-    {
-        EVE_cmd_flashread(MEM_FONT, 84928, 320); /* copy .xfont from FLASH to RAM_G, offset and length are from the .map file */
-    }
-
-#endif /* TEST_UTF8 */
-
         // EVE_cmd_inflate(MEM_LOGO, logo, sizeof(logo)); /* load logo into gfx-memory and de-compress it */
         EVE_cmd_loadimages();
         
         EVE_cmd_setrotate(DISPLAY_ORIENTATION);
     }
 }
-
-uint8_t screen_state = SCREENSTATE_HOME;                  // holds which screen should be displayed
-uint16_t display_list_size = 0;
-uint16_t lock_delay = 0;
-
-uint8_t toggle_lock = 0;
 
 /* check for touch events and setup vars for TFT_display() */
 void TFT_touch(void)
@@ -432,59 +428,117 @@ void TFT_touch(void)
                 if (0 == toggle_lock) {
                     toggle_lock = TAG_HOME_DATABUTTON;
                     toggle_state[TAG_HOME_DATABUTTON] = EVE_OPT_FLAT;
-                    lock_delay = LOCK_DELAY;
+                    lock_delay = DELAY_BUTTON;
                 }
                 break;
             case TAG_HOME_SCHEDULEBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = TAG_HOME_SCHEDULEBUTTON;
                     toggle_state[TAG_HOME_SCHEDULEBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = LOCK_DELAY;
+                    lock_delay = DELAY_BUTTON;
                 }
                 break;
             case TAG_HOME_SETTINGSBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = TAG_HOME_SETTINGSBUTTON;
                     toggle_state[TAG_HOME_SETTINGSBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = LOCK_DELAY;
+                    lock_delay = DELAY_BUTTON;
                 }
                 break;
             case TAG_DATA_BACKBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = TAG_DATA_BACKBUTTON;
                     toggle_state[TAG_DATA_BACKBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = LOCK_DELAY;
+                    lock_delay = DELAY_BUTTON;
                 }
                 break;
             case TAG_SCHEDULE_BACKBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = TAG_SCHEDULE_BACKBUTTON;
                     toggle_state[TAG_SCHEDULE_BACKBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = LOCK_DELAY;
+                    lock_delay = DELAY_BUTTON;
+                }
+                break;
+            case TAG_SCHEDULE_KEY0:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY0;
+                    toggle_state[TAG_SCHEDULE_KEY0] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY1:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY1;
+                    toggle_state[TAG_SCHEDULE_KEY1] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY2:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY2;
+                    toggle_state[TAG_SCHEDULE_KEY2] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY3:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY3;
+                    toggle_state[TAG_SCHEDULE_KEY3] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY4:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY4;
+                    toggle_state[TAG_SCHEDULE_KEY4] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY5:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY5;
+                    toggle_state[TAG_SCHEDULE_KEY5] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY6:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY6;
+                    toggle_state[TAG_SCHEDULE_KEY6] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY7:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY7;
+                    toggle_state[TAG_SCHEDULE_KEY7] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY8:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY8;
+                    toggle_state[TAG_SCHEDULE_KEY8] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_SCHEDULE_KEY9:
+                if (0 == toggle_lock) {
+                    toggle_lock = TAG_SCHEDULE_KEY9;
+                    toggle_state[TAG_SCHEDULE_KEY9] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
                 }
                 break;
             case TAG_SETTINGS_BACKBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = TAG_SETTINGS_BACKBUTTON;
                     toggle_state[TAG_SETTINGS_BACKBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = LOCK_DELAY;
+                    lock_delay = DELAY_BUTTON;
                 }
                 break;
         }
     }
 }
-
-#define HOME_BUTTON_WIDTH 110
-#define HOME_BUTTON_HEIGHT 110
-#define HOME_BUTTON_X 20
-#define HOME_BUTTON_Y 60
-#define DIGIT_WIDTH 16
-#define CLOCK_X1 340
-#define CLOCK_X2 CLOCK_X1 + 38
-#define CLOCK_X3 CLOCK_X2 + 40
-#define CLOCK_Y 2
-#define MENU_FONT 28
-#define TIME_FONT 30
 
 void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
     EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
@@ -506,29 +560,13 @@ void EVE_cmd_statusbar_burst(void) {
     EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, 32, 32, 10, 5);
 
     // clock
-    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, TIME_FONT, 0, 0);
-    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 9);
+    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, 0);
+    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, 9);
     EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y + 1, 24, 0, ":");
-    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, TIME_FONT, 0, 2);
-    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, TIME_FONT, 0, 8);
-    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, TIME_FONT, 0, "PM");
+    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, FONT_TIME, 0, 2);
+    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, 8);
+    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, "PM");
 }
-
-// location of bottom-left of graph on the LCD
-#define GRAPH_X_BASE 200
-#define GRAPH_Y_BASE 220
-
-// with scale set to 1, each unit corresponds to 1 pixel
-#define GRAPH_X_SCALE 1
-#define GRAPH_Y_SCALE 1
-
-// length of the x and y axes
-#define GRAPH_X_LEN 200
-#define GRAPH_Y_LEN 150
-
-// interval between gridlines
-#define GRAPH_X_INTERVAL GRAPH_X_SCALE * 50
-#define GRAPH_Y_INTERVAL GRAPH_Y_SCALE * 50
 
 int16_t getMinValue(int16_t* arr, uint16_t num_points) {
     int16_t min_value = arr[0];
@@ -603,30 +641,46 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
             EVE_cmd_button_burst(HOME_BUTTON_X, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, 28, toggle_state[tag_value], " ");
-            EVE_cmd_text_burst(HOME_BUTTON_X + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, MENU_FONT, 0, "Data");
+            EVE_cmd_text_burst(HOME_BUTTON_X + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, FONT_PRIMARY, 0, "Data");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_HOME_SCHEDULEBUTTON:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(2 * HOME_BUTTON_X + HOME_BUTTON_WIDTH, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, MENU_FONT, toggle_state[tag_value], " ");
-            EVE_cmd_text_burst(2 * HOME_BUTTON_X + HOME_BUTTON_WIDTH + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, MENU_FONT, 0, "Schedule");
+            EVE_cmd_button_burst(2 * HOME_BUTTON_X + HOME_BUTTON_WIDTH, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_text_burst(2 * HOME_BUTTON_X + HOME_BUTTON_WIDTH + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, FONT_PRIMARY, 0, "Schedule");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_HOME_SETTINGSBUTTON:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(3 * HOME_BUTTON_X + 2 * HOME_BUTTON_WIDTH, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, MENU_FONT, toggle_state[tag_value], " ");
-            EVE_cmd_text_burst(3 * HOME_BUTTON_X + 2 * HOME_BUTTON_WIDTH + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, MENU_FONT, 0, "Settings");
+            EVE_cmd_button_burst(3 * HOME_BUTTON_X + 2 * HOME_BUTTON_WIDTH, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_text_burst(3 * HOME_BUTTON_X + 2 * HOME_BUTTON_WIDTH + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, FONT_PRIMARY, 0, "Settings");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_SCHEDULE_KEY0:
+        case TAG_SCHEDULE_KEY1:
+        case TAG_SCHEDULE_KEY2:
+        case TAG_SCHEDULE_KEY3:
+        case TAG_SCHEDULE_KEY4:
+        case TAG_SCHEDULE_KEY5:
+        case TAG_SCHEDULE_KEY6:
+        case TAG_SCHEDULE_KEY7:
+        case TAG_SCHEDULE_KEY8:
+        case TAG_SCHEDULE_KEY9:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(50, 50, 20, 20, FONT_PRIMARY, toggle_state[tag_value], "0");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_DATA_BACKBUTTON:
         case TAG_SCHEDULE_BACKBUTTON:
         case TAG_SETTINGS_BACKBUTTON:
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(20, 220, 30, 30, MENU_FONT, toggle_state[tag_value], " ");
+            EVE_cmd_button_burst(20, 220, 30, 30, FONT_PRIMARY, toggle_state[tag_value], " ");
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
@@ -648,7 +702,10 @@ void TFT_home(void) {
         EVE_cmd_dl_burst(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
         EVE_cmd_dl_burst(TAG(0));
 
-        if (lock_delay == 1) {
+        if (lock_delay > 1) {
+            lock_delay--;
+        }
+        else if (lock_delay == 1) {
             if (toggle_state[TAG_HOME_DATABUTTON] != 0) {
                 screen_state = SCREENSTATE_DATA;
                 toggle_state[TAG_HOME_DATABUTTON] = 0;
@@ -663,9 +720,6 @@ void TFT_home(void) {
             }
             lock_delay = 0;
         }
-        else if (lock_delay != 0) {
-            lock_delay--;
-        }
 
         EVE_cmd_statusbar_burst();
 
@@ -678,18 +732,8 @@ void TFT_home(void) {
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
         EVE_end_cmd_burst();
-        while (EVE_busy());
     }
 }
-
-uint16_t num_points = 8;
-/* 
-    data MUST be in order:
-    x_data = {x_0, x_1, x_2,...,x_i, x_i+1,...}
-    y_data = {y_0, y_1, y_2,...,y_i, y_i+1,...}
-*/
-int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 
 void TFT_data(void) {
     if (tft_active != 0) {
@@ -699,15 +743,15 @@ void TFT_data(void) {
         EVE_cmd_dl_burst(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
         EVE_cmd_dl_burst(TAG(0));
 
-        if (lock_delay == 1) {
+        if (lock_delay > 1) {
+            lock_delay--;
+        }
+        else if (lock_delay == 1) {
             if (toggle_state[TAG_DATA_BACKBUTTON] != 0) {
                 screen_state = SCREENSTATE_HOME;
                 toggle_state[TAG_DATA_BACKBUTTON] = 0;
             }
             lock_delay = 0;
-        }
-        else if (lock_delay != 0) {
-            lock_delay--;
         }
 
         EVE_cmd_statusbar_burst();
@@ -719,7 +763,6 @@ void TFT_data(void) {
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
         EVE_end_cmd_burst();
-        while (EVE_busy());
     }
 }
 
@@ -731,25 +774,28 @@ void TFT_schedule(void) {
         EVE_cmd_dl_burst(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
         EVE_cmd_dl_burst(TAG(0));
 
-        if (lock_delay == 1) {
+        if (lock_delay > 1) {
+            lock_delay--;
+        }
+        else if (lock_delay == 1) {
             if (toggle_state[TAG_SCHEDULE_BACKBUTTON] != 0) {
                 screen_state = SCREENSTATE_HOME;
                 toggle_state[TAG_SCHEDULE_BACKBUTTON] = 0;
             }
+            else if (toggle_state[TAG_SCHEDULE_KEY0] != 0) {
+                toggle_state[TAG_SCHEDULE_KEY0] = 0;
+            }
             lock_delay = 0;
-        }
-        else if (lock_delay != 0) {
-            lock_delay--;
         }
 
         EVE_cmd_statusbar_burst();
 
         EVE_cmd_custombutton_burst(TAG_SCHEDULE_BACKBUTTON);
+        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY0);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
         EVE_end_cmd_burst();
-        while (EVE_busy());
     }
 }
 
@@ -761,15 +807,15 @@ void TFT_settings(void) {
         EVE_cmd_dl_burst(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
         EVE_cmd_dl_burst(TAG(0));
 
-        if (lock_delay == 1) {
+        if (lock_delay > 1) {
+            lock_delay--;
+        }
+        else if (lock_delay == 1) {
             if (toggle_state[TAG_SETTINGS_BACKBUTTON] != 0) {
                 screen_state = SCREENSTATE_HOME;
                 toggle_state[TAG_SETTINGS_BACKBUTTON] = 0;
             }
             lock_delay = 0;
-        }
-        else if (lock_delay != 0) {
-            lock_delay--;
         }
 
         EVE_cmd_statusbar_burst();
@@ -779,7 +825,6 @@ void TFT_settings(void) {
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
         EVE_end_cmd_burst();
-        while (EVE_busy());
     }
 }
 
