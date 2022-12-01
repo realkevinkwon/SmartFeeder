@@ -694,6 +694,8 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
     }
 }
 
+
+/* === screens === */
 void TFT_home(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
@@ -827,6 +829,8 @@ void TFT_settings(void) {
         EVE_end_cmd_burst();
     }
 }
+/* =============== */
+
 
 /*
     dynamic portion of display-handling, meant to be called every 20ms or more
@@ -856,8 +860,7 @@ void TFT_display(void) {
 //         EVE_cmd_dl_burst(DL_CLEAR_RGB | WHITE);
 //         EVE_cmd_dl_burst(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
 //         EVE_cmd_dl_burst(TAG(0));
-
-
+//
 //         EVE_cmd_dl_burst(DL_DISPLAY);
 //         EVE_cmd_dl_burst(CMD_SWAP);
 //         EVE_end_cmd_burst();
