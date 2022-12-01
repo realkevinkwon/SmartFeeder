@@ -15,7 +15,7 @@
 #include "load_cell.h"
 #include "ultrasonic.h"
 
-void run_display() {
+void run_display(void* pvParameters) {
     uint32_t current_millis;
     uint32_t previous_millis = 0;
     uint8_t display_delay = 0;
@@ -62,5 +62,6 @@ void app_main() {
     mem_init();         // initialize read/write for internal memory
     printf("Done\n");
 
-    run_display();
+    xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);
+    configASSERT(xHandle);
 }
