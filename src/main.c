@@ -15,29 +15,14 @@
 #include "load_cell.h"
 #include "ultrasonic.h"
 
-void app_main() {
+void run_display() {
     uint32_t current_millis;
     uint32_t previous_millis = 0;
     uint8_t display_delay = 0;
     uint32_t micros_start, micros_end;
-    gpio_config_t io_cfg = {0};
-
-    io_cfg.intr_type = GPIO_PIN_INTR_DISABLE;
-    io_cfg.mode = GPIO_MODE_OUTPUT;
-    gpio_config(&io_cfg);
-
-    printf("Running EVE_init_spi() ... ");
-    EVE_init_spi();     // initialize LCD as SPI device
-    printf("Done\n");
-    printf("Running TFT_init() ... ");
-    TFT_init();         // run FT813 (LCD graphics chip) initialization sequence
-    printf("Done\n");
-    printf("Running mem_init() ... ");
-    mem_init();         // initialize read/write for internal memory
-    printf("Done\n");
 
     while (1) {
-       	current_millis = (uint32_t) (esp_timer_get_time() / 1000ULL);
+        current_millis = (uint32_t) (esp_timer_get_time() / 1000ULL);
 
         if((current_millis - previous_millis) > 4) /* execute the code every 5 milli-seconds */
         {
@@ -62,4 +47,20 @@ void app_main() {
         rtc_wdt_feed();
         vPortYield();
     }
+}
+
+void app_main() {
+    TaskHandle_t xHandle = NULL;
+
+    printf("\nRunning EVE_init_spi() ... \n");
+    EVE_init_spi();     // initialize LCD as SPI device
+    printf("Done\n");
+    printf("Running TFT_init() ... ");
+    TFT_init();         // run FT813 (LCD graphics chip) initialization sequence
+    printf("Done\n");
+    printf("Running mem_init() ... ");
+    mem_init();         // initialize read/write for internal memory
+    printf("Done\n");
+
+    run_display();
 }
