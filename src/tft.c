@@ -171,149 +171,18 @@ int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 /* ==================================== */
 
-void touch_calibrate(void)
-{
+/* === functions for initialization === */
+void touch_calibrate(void) {
+    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00000CC1);
+    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000FE4c);
+    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFF6BA43);
+    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x000115DF);
+    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0xFFFFF849);
+    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF8DE4B);
 
-/* send pre-recorded touch calibration values, depending on the display the code is compiled for */
-
-#if defined (EVE_CFAF240400C1_030SC)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x0000ed11);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00001139);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff76809);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x00000000);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x00010690);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xfffadf2e);
-#endif
-
-#if defined (EVE_CFAF320240F_035T)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00005614);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000009e);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff43422);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x0000001d);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0xffffbda4);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x00f8f2ef);
-#endif
-
-#if defined (EVE_CFAF480128A0_039TC)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00010485);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000017f);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfffb0bd3);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x00000073);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x0000e293);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x00069904);
-#endif
-
-#if defined (EVE_CFAF800480E0_050SC)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000107f9);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0xffffff8c);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff451ae);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x000000d2);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x0000feac);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xfffcfaaf);
-#endif
-
-#if defined (EVE_PAF90)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00000159);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0001019c);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff93625);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x00010157);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x00000000);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x0000c101);
-#endif
-
-#if defined (EVE_RiTFT43)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000062cd);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0xfffffe45);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff45e0a);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x000001a3);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x00005b33);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFFbb870);
-#endif
-
-#if defined (EVE_EVE2_38)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00007bed);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000001b0);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff60aa5);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x00000095);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0xffffdcda);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x00829c08);
-#endif
-
-#if defined (EVE_EVE2_35G) ||  defined (EVE_EVE3_35G)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000109E4);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000007A6);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFEC1EBA);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x0000072C);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x0001096A);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF469CF);
-#endif
-
-#if defined (EVE_EVE2_43G) ||  defined (EVE_EVE3_43G)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x0000a1ff);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00000680);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xffe54cc2);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0xffffff53);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x0000912c);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xfffe628d);
-#endif
-
-#if defined (EVE_EVE2_50G) || defined (EVE_EVE3_50G)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000109E4);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000007A6);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFEC1EBA);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x0000072C);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x0001096A);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF469CF);
-#endif
-
-#if defined (EVE_EVE2_70G)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000105BC);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0xFFFFFA8A);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0x00004670);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0xFFFFFF75);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x00010074);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFFF14C8);
-#endif
-
-#if defined (EVE_NHD_35)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x0000f78b);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00000427);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfffcedf8);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0xfffffba4);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x0000f756);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x0009279e);
-#endif
-
-#if defined (EVE_RVT70)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000074df);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000000e6);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfffd5474);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x000001af);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x00007e79);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xffe9a63c);
-#endif
-
-#if defined (EVE_FT811CB_HY50HD)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 66353);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 712);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 4293876677);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 4294966157);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 67516);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 418276);
-#endif
-
-#if defined (EVE_ADAM101)
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000101E3);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00000114);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFF5EEBA);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0xFFFFFF5E);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0x00010226);
-    EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x0000C783);
-#endif
-
-/* activate this if you are using a module for the first time or if you need to re-calibrate it */
-/* write down the numbers on the screen and either place them in one of the pre-defined blocks above or make a new block */
-#if 1
+// activate this if you are using a module for the first time or if you need to re-calibrate it
+// write down the numbers on the screen and make a new block
+#if 0
     /* calibrate touch and displays values to screen */
     EVE_cmd_dl(CMD_DLSTART);
     EVE_cmd_dl(DL_CLEAR_RGB | BLACK);
@@ -376,32 +245,17 @@ void TFT_init(void)
 
         EVE_memWrite8(REG_PWM_DUTY, 0x30);  /* setup backlight, range is from 0 = off to 0x80 = max */
 
-        // EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0 << 16);
-        // EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 1 << 16);
-        // EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0 << 16);
-        // EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 1 << 16);
-        // EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0 << 16);
-        // EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0 << 16);
+        touch_calibrate();
 
-        // touch_calibrate();   // use this to get touch transform values
-
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00000CC1);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000FE4c);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFF6BA43);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_D, 0x000115DF);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_E, 0xFFFFF849);
-        EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF8DE4B);
-
-        // EVE_cmd_inflate(MEM_LOGO, logo, sizeof(logo)); /* load logo into gfx-memory and de-compress it */
         EVE_cmd_loadimages();
         
         EVE_cmd_setrotate(DISPLAY_ORIENTATION);
     }
 }
+/* ==================================== */
 
 /* check for touch events and setup vars for TFT_display() */
-void TFT_touch(void)
-{
+void TFT_touch(void) {
     uint8_t tag;
     // static uint8_t toggle_lock = 0;
 
@@ -832,9 +686,7 @@ void TFT_settings(void) {
 /* =============== */
 
 
-/*
-    dynamic portion of display-handling, meant to be called every 20ms or more
-*/
+/* dynamic portion of display-handling, meant to be called every 20ms or more */
 void TFT_display(void) {
     switch (screen_state) {
         case SCREENSTATE_HOME:
