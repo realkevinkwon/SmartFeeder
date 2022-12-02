@@ -58,8 +58,8 @@
 
 
 /* === delay values for touch === */
-#define DELAY_BUTTON 10
-#define DELAY_KEY 2
+#define DELAY_BUTTON 5
+#define DELAY_KEY 5
 /* ============================== */
 
 
@@ -279,115 +279,31 @@ void TFT_touch(void) {
                 break;
 
             case TAG_HOME_DATABUTTON: /* use button on top as on/off toggle-switch */
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_HOME_DATABUTTON;
-                    toggle_state[TAG_HOME_DATABUTTON] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_BUTTON;
-                }
-                break;
             case TAG_HOME_SCHEDULEBUTTON:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_HOME_SCHEDULEBUTTON;
-                    toggle_state[TAG_HOME_SCHEDULEBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_BUTTON;
-                }
-                break;
             case TAG_HOME_SETTINGSBUTTON:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_HOME_SETTINGSBUTTON;
-                    toggle_state[TAG_HOME_SETTINGSBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_BUTTON;
-                }
-                break;
             case TAG_DATA_BACKBUTTON:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_DATA_BACKBUTTON;
-                    toggle_state[TAG_DATA_BACKBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_BUTTON;
-                }
-                break;
             case TAG_SCHEDULE_BACKBUTTON:
+            case TAG_SETTINGS_BACKBUTTON:
                 if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_BACKBUTTON;
-                    toggle_state[TAG_SCHEDULE_BACKBUTTON] = EVE_OPT_FLAT;
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_BUTTON;
                 }
                 break;
             case TAG_SCHEDULE_KEY0:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY0;
-                    toggle_state[TAG_SCHEDULE_KEY0] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY1:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY1;
-                    toggle_state[TAG_SCHEDULE_KEY1] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY2:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY2;
-                    toggle_state[TAG_SCHEDULE_KEY2] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY3:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY3;
-                    toggle_state[TAG_SCHEDULE_KEY3] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY4:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY4;
-                    toggle_state[TAG_SCHEDULE_KEY4] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY5:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY5;
-                    toggle_state[TAG_SCHEDULE_KEY5] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY6:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY6;
-                    toggle_state[TAG_SCHEDULE_KEY6] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY7:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY7;
-                    toggle_state[TAG_SCHEDULE_KEY7] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY8:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY8;
-                    toggle_state[TAG_SCHEDULE_KEY8] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_SCHEDULE_KEY9:
                 if (0 == toggle_lock) {
-                    toggle_lock = TAG_SCHEDULE_KEY9;
-                    toggle_state[TAG_SCHEDULE_KEY9] = EVE_OPT_FLAT;
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                }
-                break;
-            case TAG_SETTINGS_BACKBUTTON:
-                if (0 == toggle_lock) {
-                    toggle_lock = TAG_SETTINGS_BACKBUTTON;
-                    toggle_state[TAG_SETTINGS_BACKBUTTON] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_BUTTON;
                 }
                 break;
         }
