@@ -65,6 +65,11 @@
 /* ============================== */
 
 
+/* === macro functions for input === */
+#define KEY_VALUE(tag) (tag - KEY_TAG_OFFSET)
+#define INT_TO_ASCII(x) (x + 48)
+/* ================================= */
+
 /* === screenstate values === */
 #define SCREENSTATE_HOME 0
 #define SCREENSTATE_DATA 1
@@ -84,16 +89,17 @@
 
 /* schedule screen */
 #define TAG_SCHEDULE_BACKBUTTON 5
-#define TAG_SCHEDULE_KEY0 6
-#define TAG_SCHEDULE_KEY1 7
-#define TAG_SCHEDULE_KEY2 8
-#define TAG_SCHEDULE_KEY3 9
-#define TAG_SCHEDULE_KEY4 10
-#define TAG_SCHEDULE_KEY5 11
-#define TAG_SCHEDULE_KEY6 12
-#define TAG_SCHEDULE_KEY7 13
-#define TAG_SCHEDULE_KEY8 14
-#define TAG_SCHEDULE_KEY9 15
+#define KEY_TAG_OFFSET 6
+#define TAG_SCHEDULE_KEY0 (KEY_TAG_OFFSET + 0)
+#define TAG_SCHEDULE_KEY1 (KEY_TAG_OFFSET + 1)
+#define TAG_SCHEDULE_KEY2 (KEY_TAG_OFFSET + 2)
+#define TAG_SCHEDULE_KEY3 (KEY_TAG_OFFSET + 3)
+#define TAG_SCHEDULE_KEY4 (KEY_TAG_OFFSET + 4)
+#define TAG_SCHEDULE_KEY5 (KEY_TAG_OFFSET + 5)
+#define TAG_SCHEDULE_KEY6 (KEY_TAG_OFFSET + 6)
+#define TAG_SCHEDULE_KEY7 (KEY_TAG_OFFSET + 7)
+#define TAG_SCHEDULE_KEY8 (KEY_TAG_OFFSET + 8)
+#define TAG_SCHEDULE_KEY9 (KEY_TAG_OFFSET + 9)
 
 /* settings screen */
 #define TAG_SETTINGS_BACKBUTTON 16
@@ -136,8 +142,8 @@
 /* number keys */
 #define KEY_HEIGHT 30
 #define KEY_WIDTH 30
-#define KEY_X 50
-#define KEY_Y 50
+#define KEYPAD_X 340
+#define KEYPAD_Y 50
 #define KEY_X_OFFSET (KEY_WIDTH + 10)
 #define KEY_Y_OFFSET (KEY_HEIGHT + 10)
 /* ====================================================== */
@@ -163,6 +169,12 @@ uint8_t tft_active = 0;
 uint16_t num_profile_a, num_profile_b;
 uint16_t display_list_size = 0;
 /* ========================= */
+
+
+/* === variables for input === */
+char input[255] = "";
+size_t input_size = 0;
+/* =========================== */
 
 
 /* === variables for touch === */
@@ -319,6 +331,9 @@ void TFT_touch(void) {
                 if (0 == toggle_lock) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
+                    input[input_size] = INT_TO_ASCII(KEY_VALUE(tag));
+                    input_size++;
+                    input[input_size] = '\0';
                     lock_delay = DELAY_KEY;
                 }
                 break;
@@ -450,70 +465,70 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X, KEY_Y, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "1");
+            EVE_cmd_button_burst(KEYPAD_X, KEYPAD_Y, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "1");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY2:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + KEY_X_OFFSET, KEY_Y, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "2");
+            EVE_cmd_button_burst(KEYPAD_X + KEY_X_OFFSET, KEYPAD_Y, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "2");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY3:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + 2 * KEY_X_OFFSET, KEY_Y, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "3");
+            EVE_cmd_button_burst(KEYPAD_X + 2 * KEY_X_OFFSET, KEYPAD_Y, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "3");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY4:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X, KEY_Y + KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "4");
+            EVE_cmd_button_burst(KEYPAD_X, KEYPAD_Y + KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "4");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY5:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + KEY_X_OFFSET, KEY_Y + KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "5");
+            EVE_cmd_button_burst(KEYPAD_X + KEY_X_OFFSET, KEYPAD_Y + KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "5");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY6:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + 2 * KEY_X_OFFSET, KEY_Y + KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "6");
+            EVE_cmd_button_burst(KEYPAD_X + 2 * KEY_X_OFFSET, KEYPAD_Y + KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "6");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY7:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X, KEY_Y + 2 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "7");
+            EVE_cmd_button_burst(KEYPAD_X, KEYPAD_Y + 2 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "7");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY8:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + KEY_X_OFFSET, KEY_Y + 2 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "8");
+            EVE_cmd_button_burst(KEYPAD_X + KEY_X_OFFSET, KEYPAD_Y + 2 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "8");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY9:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + 2 * KEY_X_OFFSET, KEY_Y + 2 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "9");
+            EVE_cmd_button_burst(KEYPAD_X + 2 * KEY_X_OFFSET, KEYPAD_Y + 2 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "9");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY0:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(KEY_X + KEY_X_OFFSET, KEY_Y + 3 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "0");
+            EVE_cmd_button_burst(KEYPAD_X + KEY_X_OFFSET, KEYPAD_Y + 3 * KEY_Y_OFFSET, KEY_WIDTH, KEY_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "0");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_DATA_BACKBUTTON:
@@ -534,6 +549,18 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
     }
 }
 
+void EVE_cmd_keypad_burst(void) {
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY1);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY2);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY3);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY4);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY5);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY6);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY7);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY8);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY9);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY0);
+}
 
 /* === screens === */
 void TFT_home(void) {
@@ -640,18 +667,11 @@ void TFT_schedule(void) {
         EVE_cmd_statusbar_burst();
 
         EVE_cmd_custombutton_burst(TAG_SCHEDULE_BACKBUTTON);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY1);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY2);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY3);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY4);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY5);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY6);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY7);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY8);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY9);
-        EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY0);
 
-        EVE_cmd_text_burst(120, 50, FONT_PRIMARY, 0, "");
+        EVE_cmd_keypad_burst();
+
+        EVE_color_rgb_burst(BLACK);
+        EVE_cmd_text_burst(50, 50, FONT_PRIMARY, 0, input);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
