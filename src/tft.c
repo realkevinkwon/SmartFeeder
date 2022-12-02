@@ -37,6 +37,8 @@
 #include "tft_data.h"
 
 
+
+/* ############################# MACROS - BEGIN ############################# */
 #define TEST_UTF8 0
 #define DISPLAY_ORIENTATION 0
 #define MEM_DL_STATIC (EVE_RAM_G_SIZE - 4096) /* 0xff000 - start-address of the static part of the display-list, upper 4k of gfx-mem */
@@ -150,8 +152,11 @@
 /* === memory-map addresses for bitmaps === */
 #define MEM_PIC_WIFI 0x000f0000
 /* ======================================== */
+/* ############################## MACROS - END ############################## */
 
 
+
+/* ######################## GLOBAL VARIABLES - BEGIN ######################## */
 /* === general variables === */
 uint32_t num_dl_static; /* amount of bytes in the static part of our display-list */
 uint8_t tft_active = 0;
@@ -178,6 +183,9 @@ uint16_t num_points = 8;
 int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 /* ==================================== */
+/* ######################### GLOBAL VARIABLES - END ######################### */
+
+
 
 /* === functions for initialization === */
 void touch_calibrate(void) {
@@ -642,6 +650,8 @@ void TFT_schedule(void) {
         EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY8);
         EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY9);
         EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY0);
+
+        EVE_cmd_text_burst(120, 50, FONT_PRIMARY, 0, "");
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
