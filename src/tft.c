@@ -164,12 +164,20 @@
 #define BACK_BUTTON_X 20
 #define BACK_BUTTON_Y 220
 
+/* = status bar = */
+/* wifi status */
+#define WIFI_WIDTH 32
+#define WIFI_HEIGHT WIFI_WIDTH
+#define WIFI_X 10
+#define WIFI_Y 5
+
 /* digital clock */
 #define DIGIT_WIDTH 16
 #define CLOCK_X1 340
 #define CLOCK_X2 (CLOCK_X1 + 38)
 #define CLOCK_X3 (CLOCK_X2 + 40)
 #define CLOCK_Y 2
+/* ============== */
 
 /* number keys */
 #define KEY_HEIGHT 45
@@ -202,6 +210,27 @@ uint8_t tft_active = 0;
 uint16_t num_profile_a, num_profile_b;
 uint16_t display_list_size = 0;
 /* ========================= */
+
+
+/* === variables for the status bar === */
+typedef struct _Time {
+    uint8_t hour0;
+    uint8_t hour1;
+    uint8_t minute0;
+    uint8_t minute1;
+    char suffix[3];
+} Time;
+time_t raw_time;
+struct tm* time_info;
+Time current_time = {
+    .hour0 = 0,
+    .hour1 = 0,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'}
+};
+/* ==================================== */
+
 
 
 /* === variables for input and output === */
@@ -317,7 +346,8 @@ void TFT_init(void)
 }
 /* ==================================== */
 
-/* check for touch events and setup vars for TFT_display() */
+
+/* === check for touch events and setup vars for TFT_display() === */
 void TFT_touch(void) {
     uint8_t tag;
     // static uint8_t toggle_lock = 0;
@@ -426,35 +456,10 @@ void TFT_touch(void) {
         }
     }
 }
+/* =============================================================== */
 
-void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
-    EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
-    EVE_cmd_setbitmap_burst(addr, fmt, width, height);
-    EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
-    EVE_cmd_dl_burst(DL_END);
-}
 
-void EVE_cmd_statusbar_burst(void) {
-    // status bar background
-    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
-    EVE_color_rgb_burst(BABY_BLUE);
-    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
-    EVE_cmd_dl_burst(VERTEX2F(0 * 16, 0 * 16));
-    EVE_cmd_dl_burst(VERTEX2F(480 * 16, 40 * 16));
-
-    // Wi-Fi symbol
-    EVE_color_rgb_burst(WHITE);
-    EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, 32, 32, 10, 5);
-
-    // clock
-    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, 0);
-    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, 9);
-    EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y + 1, 24, 0, ":");
-    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, FONT_TIME, 0, 2);
-    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, 8);
-    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, "PM");
-}
-
+/* === helper functions === */
 int16_t getMinValue(int16_t* arr, uint16_t num_points) {
     int16_t min_value = arr[0];
     for (int i = 0; i < num_points; i++) {
@@ -474,6 +479,77 @@ int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
 void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
 
     return;
+}
+
+void updateTime(void) {
+    // get the new raw time
+    time(&raw_time);
+
+    // translate raw_time (time_t) to time_info (struct tm*)
+    time_info = localtime(&raw_time);
+    uint8_t temp_hour = time_info->tm_hour;
+    uint8_t temp_minute = time_info->tm_min;
+
+    // translate 24-hour time to 12-hour time
+    if (temp_hour >= 0 && temp_hour <= 12) {
+        if (temp_hour == 0) {
+            temp_hour = 12;
+        }
+        current_time.suffix[0] = 'A';
+    }
+    else {
+        temp_hour -= 12;
+        current_time.suffix[0] = 'P';
+    }
+
+    current_time.hour0 = temp_hour / 10;
+    current_time.hour1 = temp_hour - 10 * current_time.hour0;
+    current_time.minute0 = temp_minute / 10;
+	current_time.minute1 = temp_minute - 10 * current_time.minute0;
+    current_time.suffix[1] = 'M';
+    current_time.suffix[2] = '\0';
+}
+/* ======================== */
+
+
+/* === functions for displaying graphical elements on-screen === */
+void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
+    EVE_cmd_setbitmap_burst(addr, fmt, width, height);
+    EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
+    EVE_cmd_dl_burst(DL_END);
+}
+
+void EVE_cmd_customclock_burst(void) {
+    updateTime();
+
+    EVE_color_rgb_burst(WHITE);
+    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_time.hour0);
+    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_time.hour1);
+    EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y + 1, 24, 0, ":");
+    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, FONT_TIME, 0, current_time.minute0);
+    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_time.minute1);
+    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, current_time.suffix);
+}
+
+void EVE_cmd_wifi_status_burst(void) {
+    EVE_color_rgb_burst(WHITE);
+    EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, WIFI_WIDTH, WIFI_HEIGHT, WIFI_X, WIFI_Y);
+}
+
+void EVE_cmd_statusbar_burst(void) {
+    // status bar background
+    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
+    EVE_color_rgb_burst(BABY_BLUE);
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl_burst(VERTEX2F(0 * 16, 0 * 16));
+    EVE_cmd_dl_burst(VERTEX2F(480 * 16, 40 * 16));
+
+    // Wi-Fi symbol
+    EVE_cmd_wifi_status_burst();
+
+    // clock
+    EVE_cmd_customclock_burst();
 }
 
 void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
@@ -677,8 +753,10 @@ void EVE_cmd_keypad_burst(void) {
     EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_0);
     EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_ENTER);
 }
+/* ============================================================= */
 
-/* === screens === */
+
+/* === functions for each screen === */
 void TFT_home(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
@@ -831,7 +909,7 @@ void TFT_settings(void) {
         EVE_end_cmd_burst();
     }
 }
-/* =============== */
+/* ================================= */
 
 
 /* dynamic portion of display-handling, meant to be called every 20ms or more */
