@@ -15,6 +15,7 @@ void mem_init(void) {
 }
 
 void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
+    printf("\nCalling mem_write()\n");
     printf("Opening Non-Volatile Storage (NVS) handle ... ");
     nvs_handle_t handle;
     esp_err_t err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &handle);
@@ -36,7 +37,7 @@ void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
             printf("The value has not been initialized\n");
             break;
         default:
-            printf("Error (%s) reading\n", esp_err_to_name(err));
+            printf("Error (%s) reading size\n", esp_err_to_name(err));
             nvs_close(handle);
             return;
     }
@@ -44,13 +45,18 @@ void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
     // Read existing data from NVS
     printf("Reading existing data from NVS ... ");
     size_t total_size = required_size + length;
-    uint32_t* data = malloc(total_size);
-    if (required_size == 0) {
-        printf("Nothing saved yet\n");
+    uint32_t* data = malloc(total_size * sizeof(uint32_t));
+    if (required_size > 0) {
+        err = nvs_get_blob(handle, namespace, data, &required_size);
+        if (err != ESP_OK) {
+            printf("Error (%s) reading data\n", esp_err_to_name(err));
+            free(data);
+            return;
+        }
+        printf("Done\n");
     }
     else {
-        err = nvs_get_blob(handle, namespace, data, &required_size);
-        printf("Done\n");
+        printf("Nothing saved yet\n");
     }
 
     // Append new data to existing data
@@ -87,6 +93,7 @@ void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
 }
 
 uint32_t* mem_read(const char* namespace, size_t* length) {
+    printf("\nCalling mem_read()\n");
     printf("Opening Non-Volatile Storage (NVS) handle ... ");
     nvs_handle_t handle;
     esp_err_t err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &handle);
@@ -119,7 +126,7 @@ uint32_t* mem_read(const char* namespace, size_t* length) {
         printf("Nothing saved yet\n");
     }
     else {
-        data = malloc(*length);
+        data = malloc(*length * sizeof(uint32_t));
         err = nvs_get_blob(handle, namespace, data, length);
         if (err != ESP_OK) {
             free(data);
@@ -133,4 +140,24 @@ uint32_t* mem_read(const char* namespace, size_t* length) {
     nvs_close(handle);
     printf("Done\n");
     return data;
+}
+
+void mem_erase(void) {
+    printf("\nCalling mem_erase()\n");
+    printf("Opening Non-Volatile Storage (NVS) handle ... ");
+    nvs_handle_t handle;
+    esp_err_t err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &handle);
+    if (err != ESP_OK) {
+        printf("Error (%s) opening NVS handle\n", esp_err_to_name(err));
+        return;
+    }
+    printf("Done\n");
+
+    printf("Erasing data associated with NVS handle ... ");
+    err = nvs_erase_all(handle);
+    if (err != ESP_OK) {
+        printf("Error (%s) erasing data\n", esp_err_to_name(err));
+        return;
+    }
+    printf("Done\n");
 }
