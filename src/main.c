@@ -12,7 +12,7 @@
 #include "memory.h"
 
 // libaries for load cells
-#include "load_cell.h"
+#include "loadcell.h"
 #include "ultrasonic.h"
 
 void run_display(void* pvParameters) {

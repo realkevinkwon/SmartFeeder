@@ -2,6 +2,7 @@
 #include "driver/gpio.h"
 #include "hx711.h"
 #include "memory.h"
+#include "loadcell.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
