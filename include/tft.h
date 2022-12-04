@@ -8,6 +8,8 @@ extern uint16_t num_profile_a, num_profile_b;
 extern "C" {
 #endif
 
+#include "tft_data.h"
+
 void TFT_init(void);
 void TFT_touch(void);
 void TFT_display(void);
