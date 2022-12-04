@@ -930,8 +930,8 @@ void TFT_display(void) {
     }
 }
 
-/* TEMPLATE */
-// void TFT_display(void) {
+/* TEMPLATE FOR NEW SCREENS */
+// void TFT_screen(void) {
 //     if (tft_active != 0) {
 //         EVE_start_cmd_burst();
 //         EVE_cmd_dl_burst(CMD_DLSTART);
