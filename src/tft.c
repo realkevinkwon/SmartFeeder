@@ -206,9 +206,9 @@ uint16_t display_list_size = 0;
 
 /* === variables for input and output === */
 char input[255] = "";
-size_t input_size = 0;
+size_t input_length = 0;
 char output[255] = "";
-size_t output_size = 0;
+size_t output_length = 0;
 /* =========================== */
 
 
@@ -366,9 +366,9 @@ void TFT_touch(void) {
                 if (0 == toggle_lock) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
-                    input[input_size] = INT_TO_ASCII(KEY_VALUE(tag));
-                    input[input_size+1] = '\0';
-                    input_size++;
+                    input[input_length] = INT_TO_ASCII(KEY_VALUE(tag));
+                    input[input_length+1] = '\0';
+                    input_length++;
                     lock_delay = DELAY_KEY;
                 }
                 break;
@@ -377,10 +377,10 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    input_size = 0;
-                    output_size = 0;
-                    input[input_size] = '\0';
-                    output[output_size] = '\0';
+                    input_length = 0;
+                    output_length = 0;
+                    input[input_length] = '\0';
+                    output[output_length] = '\0';
                 }
                 break;
             case TAG_SCHEDULE_KEY_ENTER:
@@ -388,14 +388,14 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    if (input_size > 0) {
-                        uint32_t int_input[input_size];
-                        for (int i = 0; i < input_size; i++) {
+                    if (input_length > 0) {
+                        uint32_t int_input[input_length];
+                        for (int i = 0; i < input_length; i++) {
                             int_input[i] = ASCII_TO_INT(input[i]);
                         }
-                        mem_write(LOAD_CELL_NAMESPACE, int_input, input_size);
-                        input_size = 0;
-                        input[input_size] = '\0';
+                        mem_write(LOAD_CELL_NAMESPACE, int_input, input_length);
+                        input_length = 0;
+                        input[input_length] = '\0';
                     }
                 }
                 break;
@@ -405,11 +405,11 @@ void TFT_touch(void) {
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
                     uint32_t* int_output;
-                    int_output = mem_read(LOAD_CELL_NAMESPACE, &output_size);
-                    for (int i = 0; i < output_size; i++) {
+                    int_output = mem_read(LOAD_CELL_NAMESPACE, &output_length);
+                    for (int i = 0; i < output_length; i++) {
                         output[i] = INT_TO_ASCII(int_output[i]);
                     }
-                    output[output_size] = '\0';
+                    output[output_length] = '\0';
                     if (int_output != NULL) { free(int_output); }
                 }
                 break;
@@ -418,8 +418,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    output_size = 0;
-                    output[output_size] = '\0';
+                    output_length = 0;
+                    output[output_length] = '\0';
                     mem_erase();
                 }
                 break;

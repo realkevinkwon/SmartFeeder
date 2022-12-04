@@ -44,8 +44,10 @@ void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
 
     // Read existing data from NVS
     printf("Reading existing data from NVS ... ");
-    size_t total_size = required_size + length;
-    uint32_t* data = malloc(total_size * sizeof(uint32_t));
+    size_t required_length = required_size / sizeof(uint32_t);
+    size_t new_size = length * sizeof(uint32_t);
+    size_t total_size = required_size + new_size;
+    uint32_t* data = malloc(total_size);
     if (required_size > 0) {
         err = nvs_get_blob(handle, namespace, data, &required_size);
         if (err != ESP_OK) {
@@ -62,9 +64,9 @@ void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
     // Append new data to existing data
     printf("Appending new data to existing data ... ");
     for (int i = 0; i < length; i++) {
-        data[required_size + i] = new_data[i];
+        data[required_length + i] = new_data[i];
     }
-    printf("%d bytes appended\n", 4 * length);
+    printf("%d bytes appended\n", new_size);
 
     // Write combined data to NVS
     printf("Writing data to NVS ... ");
@@ -75,7 +77,7 @@ void mem_write(const char* namespace, uint32_t* new_data, size_t length) {
         nvs_close(handle);
         return;
     }
-    printf("%d bytes written\n", 4 * total_size);
+    printf("%d bytes written\n", total_size);
 
     // Storage not updated until nvs_commit is called
     printf("Committing data to NVS ... ");
@@ -105,10 +107,11 @@ uint32_t* mem_read(const char* namespace, size_t* length) {
 
     printf("Getting size of data to be read ... ");
     // get required_size
-    err = nvs_get_blob(handle, namespace, NULL, length);
+    size_t required_size = 0;
+    err = nvs_get_blob(handle, namespace, NULL, &required_size);
     switch (err) {
         case ESP_OK:
-            printf("%d bytes\n", 4 * (*length));
+            printf("%d bytes\n", required_size);
             break;
         case ESP_ERR_NVS_NOT_FOUND:
             printf("The value has not been initialized\n");
@@ -118,22 +121,23 @@ uint32_t* mem_read(const char* namespace, size_t* length) {
             nvs_close(handle);
             return NULL;
     }
+    *length = required_size / sizeof(uint32_t);
 
     // Read data from NVS
     uint32_t* data = NULL;
     printf("Reading data from NVS ... ");
-    if (*length == 0) {
+    if (required_size == 0) {
         printf("Nothing saved yet\n");
     }
     else {
-        data = malloc(*length * sizeof(uint32_t));
-        err = nvs_get_blob(handle, namespace, data, length);
+        data = malloc(required_size);
+        err = nvs_get_blob(handle, namespace, data, &required_size);
         if (err != ESP_OK) {
             free(data);
             nvs_close(handle);
             return NULL;
         }
-        printf("%d bytes read\n", 4 * (*length));
+        printf("%d bytes read\n", required_size);
     }
 
     printf("Closing NVS handle ... ");
