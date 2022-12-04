@@ -1,8 +1,6 @@
 #ifndef __LOAD_CELL_H__
 #define __LOAD_CELL_H__
 
-#pragma once
-
 #include "driver/gpio.h"
 #include "hx711.h"
 

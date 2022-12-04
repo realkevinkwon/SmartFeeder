@@ -1,8 +1,6 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
-#pragma once
-
 #include <nvs.h>
 #include <nvs_flash.h>
 

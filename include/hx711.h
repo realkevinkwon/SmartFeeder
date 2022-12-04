@@ -39,8 +39,6 @@
 #ifndef __HX711_H__
 #define __HX711_H__
 
-#pragma once
-
 #include <driver/gpio.h>
 #include <stdbool.h>
 #include <esp_err.h>
