@@ -262,6 +262,31 @@ int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 /* ######################### GLOBAL VARIABLES - END ######################### */
 
 
+/* ##################### FUNCTION DECLARATIONS - BEGIN ###################### */
+static void touch_calibrate(void);
+
+static void EVE_cmd_loadimages(void);
+static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y);
+
+static void EVE_cmd_statusbar_burst(void);
+static void EVE_cmd_customclock_burst(void);
+static void updateTime(void);
+static void EVE_cmd_wifi_status_burst(void);
+
+static int16_t getMinValue(int16_t* arr, uint16_t num_points);
+static int16_t getMaxValue(int16_t* arr, uint16_t num_points);
+static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points);
+static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points);
+
+static void EVE_cmd_custombutton_burst(uint8_t tag_value);
+static void EVE_cmd_keypad_burst(void);
+
+static void TFT_home(void);
+static void TFT_data(void);
+static void TFT_schedule(void);
+static void TFT_settings(void);
+/* ###################### FUNCTION DECLARATIONS - END ####################### */
+
 
 /* === functions for initialization === */
 void touch_calibrate(void) {
@@ -320,10 +345,6 @@ void touch_calibrate(void) {
 
     while(1);
 #endif
-}
-
-void EVE_cmd_loadimages(void) {
-    EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi_32, sizeof(pic_wifi_32));
 }
 
 void TFT_init(void)
@@ -513,6 +534,10 @@ void updateTime(void) {
 
 
 /* === functions for displaying graphical elements on-screen === */
+void EVE_cmd_loadimages(void) {
+    EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi_32, sizeof(pic_wifi_32));
+}
+
 void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
     EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
     EVE_cmd_setbitmap_burst(addr, fmt, width, height);
