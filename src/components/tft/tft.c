@@ -1,41 +1,9 @@
-/*
-@file    tft.c / tft.cpp
-@brief   TFT handling functions for EVE_Test project
-@version 1.19
-@date    2022-03-19
-@author  Rudolph Riedel
-
-@section History
-
-1.14
-- added example code for BT81x that demonstrates how to write a flash-image from the microcontrollers memory
-  to an external flash on a BT81x module and how to use an UTF-8 font contained in this flash-image
-
-1.15
-- moved "display_list_size = EVE_memRead16(REG_CMD_DL);" from TFT_display() to TFT_touch() to speed up the display
- refresh for non-DMA targets
-
-1.16
-- disabled the UTF-8 font example code, can be re-enabled if desired by changing the "#define TEST_UTF8 0" to "#define TEST_UTF8 1"
-
-1.17
-- replaced the UTF-8 font with a freshly generated one and adjusted the parameters for the .xfont file
-
-1.18
-- several minor changes
-
-1.19
-- removed most of the history
-- changed a couple of "while (EVE_busy()) {};" lines to "EVE_execute_cmd();"
-- renamed PINK to MAGENTA
-
- */
-
 #include <time.h>
 #include <sys/time.h>
 #include "EVE.h"
 #include "tft_data.h"
 #include "memory.h"
+#include "clock.h"
 #include "wifi.h"
 
 
