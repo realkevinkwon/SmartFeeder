@@ -3,4 +3,8 @@
 
 #pragma once
 
+#include "esp_sntp.h"
+
+void wifi_init(void); 
+
 #endif /* __WIFI_H__ */
