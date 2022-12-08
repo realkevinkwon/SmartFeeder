@@ -11,6 +11,10 @@ Time current_time = {
 };
 char* time_zone = "EST5EDT,M3.2.0,M11.1.0";
 
+void clock_init(void) {
+
+}
+
 void update_time(void) {
     // get the new raw time (time_t) and translate to time_info (struct tm)
     time(&raw_time);
@@ -37,4 +41,8 @@ void update_time(void) {
 	current_time.minute1 = temp_minute - 10 * current_time.minute0;
     current_time.suffix[1] = 'M';
     current_time.suffix[2] = '\0';
+}
+
+void set_timezone(void) {
+
 }

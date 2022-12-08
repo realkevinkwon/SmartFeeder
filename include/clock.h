@@ -4,7 +4,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "esp_sntp.h"
+#include <time.h>
 
 typedef struct _Time {
     uint8_t hour0;
@@ -16,6 +16,7 @@ typedef struct _Time {
 
 extern Time current_time;
 
+void clock_init(void);
 void update_time(void);
 void set_timezone(void);
 
