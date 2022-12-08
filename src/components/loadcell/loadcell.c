@@ -1,7 +1,7 @@
 #include "loadcell.h"
 
 // Tag for logging
-static const char *TAG = "Load Cell";
+static const char *LOAD_CELL_TAG = "Load Cell";
 
 hx711_t load_cell_init(gpio_num_t dout, gpio_num_t pd_sck) {
     hx711_t load_cell = {
@@ -17,7 +17,7 @@ int32_t attempt_load_measure(hx711_t load_cell) {
     esp_err_t r = hx711_wait(&load_cell, 500);
     if (r != ESP_OK)
     {
-        ESP_LOGE(TAG, "Device not found: %d (%s)\n", r, esp_err_to_name(r));
+        ESP_LOGE(LOAD_CELL_TAG, "Device not found: %d (%s)\n", r, esp_err_to_name(r));
         return -1;
     }
 
@@ -25,7 +25,7 @@ int32_t attempt_load_measure(hx711_t load_cell) {
     r = hx711_read_average(&load_cell, LC_NUM_MEASUREMENTS, &data);
     if (r != ESP_OK)
     {
-        ESP_LOGE(TAG, "Failed to read Data: %d (%s)\n", r, esp_err_to_name(r));
+        ESP_LOGE(LOAD_CELL_TAG, "Failed to read Data: %d (%s)\n", r, esp_err_to_name(r));
         return -1;
     }
 
@@ -52,7 +52,7 @@ void load_cell_test (void *pvParameters)
     {
         float lc1_meas = LC1_to_grams(load_measure(load_cell_1));
         float lc2_meas = LC2_to_grams(load_measure(load_cell_2));
-        ESP_LOGI(TAG, "LC1: %fg   -   LC2: %fg", lc1_meas, lc2_meas);
+        ESP_LOGI(LOAD_CELL_TAG, "LC1: %fg   -   LC2: %fg", lc1_meas, lc2_meas);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
