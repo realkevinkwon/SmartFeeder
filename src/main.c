@@ -66,8 +66,8 @@ void app_main() {
     printf("Done\n");
 
     // initialize read/write for internal memory
-    printf("Running mem_initialization() ... ");
-    mem_initialization();
+    printf("Running memory_init() ... ");
+    memory_init();
     printf("Done\n");
 
     // initialize read/write for internal memory
