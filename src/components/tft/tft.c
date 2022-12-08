@@ -53,11 +53,12 @@
 #define SCREENSTATE_DATA 1
 #define SCREENSTATE_SCHEDULE 2
 #define SCREENSTATE_SETTINGS 3
+#define SCREENSTATE_DEMO 4
 /* ========================== */
 
 
 /* === tag values for touch === */
-#define TAG_SIZE 50
+#define TAG_SIZE 40
 /* home screen */
 #define TAG_OFFSET_HOME 1
 #define TAG_HOME_DATABUTTON (TAG_OFFSET_HOME + 0)
@@ -107,6 +108,14 @@
 #define TAG_OFFSET_SETTINGS (3 * TAG_SIZE + 1)
 #define TAG_SETTINGS_BACKBUTTON (TAG_OFFSET_SETTINGS + 0)
 #define TAG_SETTINGS_ERASEBUTTON (TAG_OFFSET_SETTINGS + 1)
+#define TAG_SETTINGS_DATEBUTTON (TAG_OFFSET_SETTINGS + 2)
+#define TAG_SETTINGS_DEMOBUTTON (TAG_OFFSET_SETTINGS + 3)
+
+/* dmeo screen */
+#define TAG_OFFSET_DEMO (4 * TAG_SIZE + 1)
+#define TAG_DEMO_BACKBUTTON (TAG_OFFSET_DEMO + 0)
+#define TAG_DEMO_WATERBUTTON (TAG_OFFSET_DEMO + 1)
+#define TAG_DEMO_FOODBUTTON (TAG_OFFSET_DEMO + 2)
 /* ======================== */
 
 
@@ -135,10 +144,10 @@
 #define HOME_BUTTON_Y 45
 
 /* settings screen buttons */
-#define SETTINGS_ERASEBUTTON_WIDTH 120
-#define SETTINGS_ERASEBUTTON_HEIGHT 30
-#define SETTINGS_ERASEBUTTON_X 20
-#define SETTINGS_ERASEBUTTON_Y 50
+#define SETTINGS_BUTTON_WIDTH 200
+#define SETTINGS_BUTTON_HEIGHT 40
+#define SETTINGS_BUTTON_X 20
+#define SETTINGS_BUTTON_Y 45
 
 /* data screen buttons */
 #define DATA_OFFSET 133
@@ -158,6 +167,12 @@
 #define DATA_VIEWBUTTON_HEIGHT 30
 #define DATA_VIEWBUTTON_X 80
 #define DATA_VIEWBUTTON_Y 220
+
+/* demo screen */
+#define DEMO_BUTTON_X 20
+#define DEMO_BUTTON_Y 50
+#define DEMO_BUTTON_WIDTH 200
+#define DEMO_BUTTON_HEIGHT 60
 
 /* back button */
 #define BACK_BUTTON_WIDTH 30
@@ -285,6 +300,7 @@ static int16_t getMinValue(int16_t* arr, uint16_t num_points);
 static int16_t getMaxValue(int16_t* arr, uint16_t num_points);
 static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points);
 static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points);
+static void EVE_cmd_demo_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points);
 
 static void EVE_cmd_custombutton_burst(uint8_t tag_value);
 static void EVE_cmd_keypad_burst(void);
@@ -294,6 +310,7 @@ static void TFT_home(void);
 static void TFT_data(void);
 static void TFT_schedule(void);
 static void TFT_settings(void);
+static void TFT_demo(void);
 /* ###################### FUNCTION DECLARATIONS - END ####################### */
 
 
@@ -407,6 +424,8 @@ void TFT_touch(void) {
             case TAG_DATA_BACKBUTTON:
             case TAG_SCHEDULE_BACKBUTTON:
             case TAG_SETTINGS_BACKBUTTON:
+            case TAG_DEMO_BACKBUTTON:
+            case TAG_SETTINGS_DEMOBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
@@ -495,13 +514,10 @@ void TFT_touch(void) {
             case TAG_DATA_END_DAY_DOWN:
             case TAG_DATA_END_YEAR_UP:
             case TAG_DATA_END_YEAR_DOWN:
-                if (0 == toggle_lock) {
-                    toggle_lock = tag;
-                    toggle_state[tag] = EVE_OPT_FLAT;
-                    lock_delay = DELAY_KEY;
-                }
-                break;
             case TAG_DATA_VIEWBUTTON:
+            case TAG_DEMO_WATERBUTTON:
+            case TAG_DEMO_FOODBUTTON:
+            case TAG_SETTINGS_DATEBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
@@ -577,6 +593,46 @@ static void EVE_cmd_statusbar_burst(void) {
 
     // clock
     EVE_cmd_customclock_burst();
+}
+
+static void EVE_cmd_demo_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+    EVE_color_rgb_burst(COLOR_RGB(100,100,100));
+    EVE_cmd_dl_burst(LINE_WIDTH(8));
+
+    // draw x-axis
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, GRAPH_WATER_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + GRAPH_X_LEN) * 16, GRAPH_WATER_Y_BASE * 16));
+
+    // draw y-axis
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, GRAPH_WATER_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, (GRAPH_WATER_Y_BASE - 2 * GRAPH_Y_LEN) * 16));
+
+    // draw horizontal gridlines
+    EVE_color_rgb_burst(COLOR_RGB(220,220,220));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    for (int i = 1; i < 5; i++) {
+        EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, (GRAPH_WATER_Y_BASE - i * y_interval) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_WATER_Y_BASE - i * y_interval) * 16));
+    }
+
+    // draw vertical gridlines
+    EVE_color_rgb_burst(COLOR_RGB(220,220,220));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    for (int i = 1; i < 5; i++) {
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + i * x_interval) * 16, GRAPH_WATER_Y_BASE * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + i * x_interval) * 16, (GRAPH_WATER_Y_BASE - 2 * GRAPH_Y_LEN) * 16));
+    }
+
+    // plot data
+    EVE_color_rgb_burst(BLACK);
+    EVE_cmd_dl_burst(LINE_WIDTH(12));
+    for (int i = 0; i < (num_points - 1); i++) {
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i]) * 16, (GRAPH_WATER_Y_BASE - y_data[i]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i+1]) * 16, (GRAPH_WATER_Y_BASE - y_data[i+1]) * 16));
+    }
 }
 
 static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
@@ -808,12 +864,14 @@ static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
             EVE_cmd_button_burst(DATA_VIEWBUTTON_X, DATA_VIEWBUTTON_Y, DATA_VIEWBUTTON_WIDTH, DATA_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "View data");
             EVE_cmd_dl_burst(TAG(0));
             break;
+        case TAG_DEMO_BACKBUTTON:
         case TAG_DATA_BACKBUTTON:
         case TAG_SCHEDULE_BACKBUTTON:
         case TAG_SETTINGS_BACKBUTTON:
-            EVE_cmd_dl_burst(TAG(tag_value));
             EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
             EVE_cmd_button_burst(BACK_BUTTON_X, BACK_BUTTON_Y, BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
             EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
@@ -821,7 +879,6 @@ static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
             EVE_cmd_dl_burst(VERTEX2F(36 * 16, 232 * 16));
             EVE_cmd_dl_burst(VERTEX2F(36 * 16, 240 * 16));
             EVE_cmd_dl_burst(VERTEX2F(32 * 16, 236 * 16));
-            EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_KEY_1:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
@@ -914,11 +971,39 @@ static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
             EVE_cmd_button_burst(80, 220, 200, 30, FONT_PRIMARY, toggle_state[tag_value], "Read from memory");
             EVE_cmd_dl_burst(TAG(0));
             break;
+        case TAG_SETTINGS_DATEBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y, SETTINGS_BUTTON_WIDTH, SETTINGS_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Set date and time");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_SETTINGS_DEMOBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y + SETTINGS_BUTTON_HEIGHT + 10, SETTINGS_BUTTON_WIDTH, SETTINGS_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "View demo");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
         case TAG_SETTINGS_ERASEBUTTON:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(SETTINGS_ERASEBUTTON_X, SETTINGS_ERASEBUTTON_Y, SETTINGS_ERASEBUTTON_WIDTH, SETTINGS_ERASEBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Erase flash");
+            EVE_cmd_button_burst(SETTINGS_BUTTON_X, SETTINGS_BUTTON_Y + 2 * (SETTINGS_BUTTON_HEIGHT + 10), SETTINGS_BUTTON_WIDTH, SETTINGS_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Reset flash");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DEMO_WATERBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(DEMO_BUTTON_X, DEMO_BUTTON_Y, DEMO_BUTTON_WIDTH, DEMO_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Dispense water");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DEMO_FOODBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(DEMO_BUTTON_X, DEMO_BUTTON_Y + DEMO_BUTTON_HEIGHT + 20, DEMO_BUTTON_WIDTH, DEMO_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Dispense food");
             EVE_cmd_dl_burst(TAG(0));
             break;
     }
@@ -1093,21 +1178,63 @@ static void TFT_settings(void) {
                 screen_state = SCREENSTATE_HOME;
                 toggle_state[TAG_SETTINGS_BACKBUTTON] = 0;
             }
+            else if (toggle_state[TAG_SETTINGS_DEMOBUTTON] != 0) {
+                screen_state = SCREENSTATE_DEMO;
+                toggle_state[TAG_SETTINGS_DEMOBUTTON] = 0;
+            }
             else if (toggle_state[TAG_SETTINGS_ERASEBUTTON] != 0) { toggle_state[TAG_SETTINGS_ERASEBUTTON] = 0; }
+            else if (toggle_state[TAG_SETTINGS_DATEBUTTON] != 0) { toggle_state[TAG_SETTINGS_DATEBUTTON] = 0; }
             lock_delay = 0;
         }
 
         EVE_cmd_statusbar_burst();
 
         EVE_cmd_custombutton_burst(TAG_SETTINGS_BACKBUTTON);
-
         EVE_cmd_custombutton_burst(TAG_SETTINGS_ERASEBUTTON);
+        EVE_cmd_custombutton_burst(TAG_SETTINGS_DATEBUTTON);
+        EVE_cmd_custombutton_burst(TAG_SETTINGS_DEMOBUTTON);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
         EVE_end_cmd_burst();
     }
 }
+
+static void TFT_demo(void) {
+    if (tft_active != 0) {
+        EVE_start_cmd_burst();
+        EVE_cmd_dl_burst(CMD_DLSTART);
+        EVE_cmd_dl_burst(DL_CLEAR_RGB | WHITE);
+        EVE_cmd_dl_burst(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+        EVE_cmd_dl_burst(TAG(0));
+
+        if (lock_delay > 1) {
+            lock_delay--;
+        }
+        else if (lock_delay == 1) {
+            if (toggle_state[TAG_DEMO_BACKBUTTON] != 0) {
+                screen_state = SCREENSTATE_SETTINGS;
+                toggle_state[TAG_DEMO_BACKBUTTON] = 0;
+            }
+            else if (toggle_state[TAG_DEMO_WATERBUTTON] != 0) { toggle_state[TAG_DEMO_WATERBUTTON] = 0; }
+            else if (toggle_state[TAG_DEMO_FOODBUTTON] != 0) { toggle_state[TAG_DEMO_FOODBUTTON] = 0; }
+            lock_delay = 0;
+        }
+
+        EVE_cmd_statusbar_burst();
+
+        EVE_cmd_demo_graph_burst(x_data, y_data, num_points);
+
+        EVE_cmd_custombutton_burst(TAG_DEMO_BACKBUTTON);
+        EVE_cmd_custombutton_burst(TAG_DEMO_WATERBUTTON);
+        EVE_cmd_custombutton_burst(TAG_DEMO_FOODBUTTON);
+
+        EVE_cmd_dl_burst(DL_DISPLAY);
+        EVE_cmd_dl_burst(CMD_SWAP);
+        EVE_end_cmd_burst();
+    }
+}
+
 /* ================================= */
 
 
@@ -1125,6 +1252,9 @@ void TFT_display(void) {
             break;
         case SCREENSTATE_SCHEDULE:
             TFT_schedule();
+            break;
+        case SCREENSTATE_DEMO:
+            TFT_demo();
             break;
     }
 }
