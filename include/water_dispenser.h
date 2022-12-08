@@ -21,19 +21,9 @@
 
 #define dispense_water(amount) fill_water_to_amount(WATER_BOWL_FULL_WEIGHT - amount)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void water_dispenser_init();
 float get_water_level();
 void fill_water_to_amount(float amount);
-void water_dispenser_calibration()
-
-#ifdef __cplusplus
-}
-#endif
-
-/**@}*/
+void water_dispenser_calibration();
 
 #endif /* __WATER_DISPENSER_H__ */

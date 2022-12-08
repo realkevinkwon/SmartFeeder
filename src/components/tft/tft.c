@@ -17,7 +17,6 @@
 
 /* === macros for reading from and writing to internal memory === */
 #define LOAD_CELL_NAMESPACE "load_cell"
-#define ULTRASONIC_NAMESPACE "ultrasonic"
 /* ============================================================== */
 
 
@@ -229,6 +228,9 @@
 /* ============= */
 
 
+#define BUF_SIZE 256
+
+
 /* === memory-map addresses for bitmaps === */
 #define MEM_PIC_WIFI 0x000f0000
 /* ======================================== */
@@ -275,13 +277,18 @@ char end_year_str[5] = "2022";
 char end_month_str[4] = "JAN";
 char end_day_str[3] = "02";
 
-uint16_t num_points = 8;
+uint16_t num_points = 10;
 uint16_t x_interval = 50;
 uint16_t y_interval = 50;
 uint16_t x_scale = 100;
 uint16_t y_scale = 100;
-int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
+int16_t x_data[BUF_SIZE];
+int16_t y_data[BUF_SIZE];
+int start_idx = 0;
+int end_idx = 10;
+uint16_t test_points = 8;
+int16_t x_test[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+int16_t y_test[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 /* ==================================== */
 /* ######################### GLOBAL VARIABLES - END ######################### */
 
@@ -628,12 +635,19 @@ static void EVE_cmd_demo_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t 
     }
 
     // plot data
-    EVE_color_rgb_burst(BLACK);
+    EVE_color_rgb_burst(RED);
     EVE_cmd_dl_burst(LINE_WIDTH(12));
-    for (int i = 0; i < (num_points - 1); i++) {
+    for (int i = start_idx; i < end_idx; i++) {
         EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
-        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i]) * 16, (GRAPH_WATER_Y_BASE - y_data[i]) * 16));
-        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i+1]) * 16, (GRAPH_WATER_Y_BASE - y_data[i+1]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i % BUF_SIZE]) * 16, (GRAPH_WATER_Y_BASE - y_data[i % BUF_SIZE]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[(i+1) % BUF_SIZE]) * 16, (GRAPH_WATER_Y_BASE - y_data[(i+1) % BUF_SIZE]) * 16));
+    }
+
+    EVE_color_rgb_burst(BLUE);
+    for (int i = start_idx; i < end_idx; i++) {
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i % BUF_SIZE]) * 16, (GRAPH_WATER_Y_BASE - y_data[i % BUF_SIZE]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[(i+1) % BUF_SIZE]) * 16, (GRAPH_WATER_Y_BASE - y_data[(i+1) % BUF_SIZE]) * 16));
     }
 }
 
@@ -1091,7 +1105,7 @@ static void TFT_data(void) {
 
         EVE_cmd_date_select_burst();
 
-        EVE_cmd_display_graph_burst(x_data, y_data, num_points);
+        EVE_cmd_display_graph_burst(x_test, y_test, test_points);
 
         EVE_cmd_custombutton_burst(TAG_DATA_BACKBUTTON);
         EVE_cmd_custombutton_burst(TAG_DATA_START_MONTH_UP);
@@ -1225,7 +1239,7 @@ static void TFT_demo(void) {
 
         EVE_cmd_statusbar_burst();
 
-        EVE_cmd_demo_graph_burst(x_data, y_data, num_points);
+        EVE_cmd_demo_graph_burst(x_data, y_data, 0);
 
         EVE_cmd_custombutton_burst(TAG_DEMO_BACKBUTTON);
         EVE_cmd_custombutton_burst(TAG_DEMO_WATERBUTTON);

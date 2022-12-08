@@ -24,19 +24,9 @@
 
 #define dispense_food(amount) fill_food_to_amount(FOOD_BOWL_FULL_WEIGHT - amount)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void food_dispenser_init();
 float get_food_level();
 void fill_food_to_amount(float amount);
 void food_dispenser_calibration();
-
-#ifdef __cplusplus
-}
-#endif
-
-/**@}*/
 
 #endif /* __FOOD_DISPENSER_H__ */

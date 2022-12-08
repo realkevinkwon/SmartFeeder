@@ -11,16 +11,6 @@
 #define close_solenoid() gpio_set_level(SOLENOID_PIN, 1)
 #define open_solenoid() gpio_set_level(SOLENOID_PIN, 0)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void solenoid_init();
-
-#ifdef __cplusplus
-}
-#endif
-
-/**@}*/
 
 #endif /* __SOLENOID_H__ */
