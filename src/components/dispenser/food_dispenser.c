@@ -36,5 +36,5 @@ void food_dispenser_calibration() {
     vTaskDelay(100 / portTICK_PERIOD_MS);
     step_to_angle(FOOD_DISPENSER_CLOSED_ANGLE);
     float final_level = get_food_level();
-    ESP_LOGI(TAG, "Amount: %fg", final_level - initial_level);
+    ESP_LOGI(TAG, "Amount Dispensed: %fg", final_level - initial_level);
 }

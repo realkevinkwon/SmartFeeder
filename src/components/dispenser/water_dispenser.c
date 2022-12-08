@@ -1,7 +1,7 @@
 #include "water_dispenser.h"
 
 // Tag for logging
-// static const char *TAG = "Water Dispenser";
+static const char *TAG = "Water Dispenser";
 
 hx711_t load_cell;
 
@@ -28,4 +28,13 @@ void fill_water_to_amount(float amount) {
     open_solenoid();
     vTaskDelay(open_time / portTICK_PERIOD_MS);
     close_solenoid();
+}
+
+void water_dispenser_calibration() {
+    float initial_level = get_water_level();
+    open_solenoid();
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    close_solenoid();
+    float final_level = get_water_level();
+    ESP_LOGI(TAG, "Amount Dispensed: %fg", final_level - initial_level);
 }
