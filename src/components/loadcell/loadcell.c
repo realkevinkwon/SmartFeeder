@@ -13,7 +13,7 @@ hx711_t load_cell_init(gpio_num_t dout, gpio_num_t pd_sck) {
     return load_cell;
 }
 
-int32_t load_measure(hx711_t load_cell) {
+int32_t attempt_load_measure(hx711_t load_cell) {
     esp_err_t r = hx711_wait(&load_cell, 500);
     if (r != ESP_OK)
     {
@@ -30,6 +30,17 @@ int32_t load_measure(hx711_t load_cell) {
     }
 
     return data;
+}
+
+int32_t load_measure(hx711_t load_cell) {
+    int32_t load_meas;
+    for (int32_t i = 0; i < LC_NUM_ATTEMPTS; i++) {
+        load_meas = attempt_load_measure(load_cell);
+        if (load_meas != -1) {
+            return load_meas;
+        }
+    }
+    return -1;
 }
 
 void load_cell_test (void *pvParameters)

@@ -31,6 +31,7 @@ extern "C" {
 void food_dispenser_init();
 float get_food_level();
 void fill_food_to_amount(float amount);
+void food_dispenser_calibration();
 
 #ifdef __cplusplus
 }

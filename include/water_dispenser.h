@@ -28,6 +28,7 @@ extern "C" {
 void water_dispenser_init();
 float get_water_level();
 void fill_water_to_amount(float amount);
+void water_dispenser_calibration()
 
 #ifdef __cplusplus
 }
