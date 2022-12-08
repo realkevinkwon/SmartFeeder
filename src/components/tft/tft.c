@@ -65,6 +65,20 @@
 /* data screen */
 #define TAG_OFFSET_DATA (TAG_SIZE + 1)
 #define TAG_DATA_BACKBUTTON (TAG_OFFSET_DATA + 0)
+#define TAG_DATA_START_MONTH_UP (TAG_OFFSET_DATA + 1)
+#define TAG_DATA_START_MONTH_DOWN (TAG_OFFSET_DATA + 2)
+#define TAG_DATA_START_DAY_UP (TAG_OFFSET_DATA + 3)
+#define TAG_DATA_START_DAY_DOWN (TAG_OFFSET_DATA + 4)
+#define TAG_DATA_START_YEAR_UP (TAG_OFFSET_DATA + 5)
+#define TAG_DATA_START_YEAR_DOWN (TAG_OFFSET_DATA + 6)
+#define TAG_DATA_END_MONTH_UP (TAG_OFFSET_DATA + 7)
+#define TAG_DATA_END_MONTH_DOWN (TAG_OFFSET_DATA + 8)
+#define TAG_DATA_END_DAY_UP (TAG_OFFSET_DATA + 9)
+#define TAG_DATA_END_DAY_DOWN (TAG_OFFSET_DATA + 10)
+#define TAG_DATA_END_YEAR_UP (TAG_OFFSET_DATA + 11)
+#define TAG_DATA_END_YEAR_DOWN (TAG_OFFSET_DATA + 12)
+
+#define TAG_DATA_VIEWBUTTON (TAG_OFFSET_DATA + 13)
 
 /* schedule screen */
 #define TAG_OFFSET_SCHEDULE (2 * TAG_SIZE + 1)
@@ -95,36 +109,53 @@
 
 
 /* === macros for drawing graphs === */
-// location of bottom-left of graph on the LCD
-#define GRAPH_X_BASE 200
-#define GRAPH_Y_BASE 220
-
-// with scale set to 1, each unit corresponds to 1 pixel
-#define GRAPH_X_SCALE 1
-#define GRAPH_Y_SCALE 1
+// with scale set to 100, each unit corresponds to 1 pixel
+#define GRAPH_X_SCALE 100
+#define GRAPH_Y_SCALE 100
 
 // length of the x and y axes
 #define GRAPH_X_LEN 200
-#define GRAPH_Y_LEN 150
+#define GRAPH_Y_LEN 100
 
-// interval between gridlines
-#define GRAPH_X_INTERVAL (GRAPH_X_SCALE * 50)
-#define GRAPH_Y_INTERVAL (GRAPH_Y_SCALE * 50)
+// location of bottom-left of graph on the LCD
+#define GRAPH_FOOD_X_BASE 270
+#define GRAPH_FOOD_Y_BASE 135
+#define GRAPH_WATER_X_BASE GRAPH_FOOD_X_BASE
+#define GRAPH_WATER_Y_BASE (GRAPH_FOOD_Y_BASE + GRAPH_Y_LEN + 10)
 /* ================================= */
 
 
 /* === dimensions and locations of on-screen elements === */
 /* home screen buttons */
-#define HOME_BUTTON_WIDTH 110
-#define HOME_BUTTON_HEIGHT HOME_BUTTON_WIDTH
+#define HOME_BUTTON_WIDTH 200
+#define HOME_BUTTON_HEIGHT 40
 #define HOME_BUTTON_X 20
-#define HOME_BUTTON_Y 60
+#define HOME_BUTTON_Y 45
 
 /* settings screen buttons */
 #define SETTINGS_ERASEBUTTON_WIDTH 120
 #define SETTINGS_ERASEBUTTON_HEIGHT 30
 #define SETTINGS_ERASEBUTTON_X 20
 #define SETTINGS_ERASEBUTTON_Y 50
+
+/* data screen buttons */
+#define DATA_OFFSET 133
+#define DATA_DATE_BUTTON_HEIGHT 16
+#define DATA_DATE_BUTTON_WIDTH 24
+#define DATA_X1 START_DATE_X
+#define DATA_X2 (DATA_X1 + 35)
+#define DATA_X3 (DATA_X2 + 35)
+#define DATA_X4 END_DATE_X
+#define DATA_X5 (DATA_X4 + 35)
+#define DATA_X6 (DATA_X5 + 35)
+
+#define DATA_Y1 (START_DATE_Y - 35)
+#define DATA_Y2 (START_DATE_Y + 30)
+
+#define DATA_VIEWBUTTON_WIDTH 120
+#define DATA_VIEWBUTTON_HEIGHT 30
+#define DATA_VIEWBUTTON_X 80
+#define DATA_VIEWBUTTON_Y 220
 
 /* back button */
 #define BACK_BUTTON_WIDTH 30
@@ -133,18 +164,20 @@
 #define BACK_BUTTON_Y 220
 
 /* = status bar = */
+#define STATUS_BAR_HEIGHT 25
+
 /* wifi status */
 #define WIFI_WIDTH 32
 #define WIFI_HEIGHT WIFI_WIDTH
 #define WIFI_X 10
-#define WIFI_Y 5
+#define WIFI_Y 1
 
 /* digital clock */
-#define DIGIT_WIDTH 16
-#define CLOCK_X1 340
-#define CLOCK_X2 (CLOCK_X1 + 38)
-#define CLOCK_X3 (CLOCK_X2 + 40)
-#define CLOCK_Y 2
+#define DIGIT_WIDTH 12
+#define CLOCK_X1 385
+#define CLOCK_X2 (CLOCK_X1 + 28)
+#define CLOCK_X3 (CLOCK_X2 + 30)
+#define CLOCK_Y 1
 /* ============== */
 
 /* number keys */
@@ -154,13 +187,28 @@
 #define KEYPAD_Y 50
 #define KEY_X_OFFSET (KEY_WIDTH + 10)
 #define KEY_Y_OFFSET (KEY_HEIGHT + 10)
+
+/* dates */
+#define START_DATE_X 10
+#define START_DATE_Y 90
+#define END_DATE_X (START_DATE_X + DATE_WIDTH + 20)
+#define END_DATE_Y START_DATE_Y
+#define DATE_HEIGHT 16
+#define MONTH_WIDTH 24
+#define MONTH_HEIGHT DATE_HEIGHT
+#define DAY_WIDTH 16
+#define DAY_HEIGHT DATE_HEIGHT
+#define YEAR_WIDTH 32
+#define YEAR_HEIGHT DATE_HEIGHT
+#define DATE_WIDTH (MONTH_WIDTH + DAY_WIDTH + YEAR_WIDTH + 30)
 /* ====================================================== */
 
 
 /* === fonts === */
 #define FONT_PRIMARY 28
 #define FONT_KEY_WORD 20
-#define FONT_TIME 30
+#define FONT_TIME 28
+#define FONT_DATE 26
 /* ============= */
 
 
@@ -196,13 +244,25 @@ uint8_t toggle_lock = 0;                    // allows only one touch target to b
 /* =========================== */
 
 
-/* === variables for drawing graphs === */
+/* === variables related to drawing graphs === */
+uint16_t start_year = 2022;
+uint8_t start_month = 1;
+uint8_t start_day = 1;
+uint16_t end_year = 2022;
+uint8_t end_month = 1;
+uint8_t end_day = 2;
+char start_year_str[5] = "2022";
+char start_month_str[4] = "JAN";
+char start_day_str[3] = "01";
+char end_year_str[5] = "2022";
+char end_month_str[4] = "JAN";
+char end_day_str[3] = "02";
+
 uint16_t num_points = 8;
-/* 
-    data MUST be in order:
-    x_data = {x_0, x_1, x_2,...,x_i, x_i+1,...}
-    y_data = {y_0, y_1, y_2,...,y_i, y_i+1,...}
-*/
+uint16_t x_interval = 50;
+uint16_t y_interval = 50;
+uint16_t x_scale = 100;
+uint16_t y_scale = 100;
 int16_t x_data[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 int16_t y_data[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 /* ==================================== */
@@ -226,6 +286,7 @@ static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16
 
 static void EVE_cmd_custombutton_burst(uint8_t tag_value);
 static void EVE_cmd_keypad_burst(void);
+static void EVE_cmd_date_select_burst(void);
 
 static void TFT_home(void);
 static void TFT_data(void);
@@ -420,6 +481,31 @@ void TFT_touch(void) {
                     mem_erase();
                 }
                 break;
+            case TAG_DATA_START_MONTH_UP:
+            case TAG_DATA_START_MONTH_DOWN:
+            case TAG_DATA_START_DAY_UP:
+            case TAG_DATA_START_DAY_DOWN:
+            case TAG_DATA_START_YEAR_UP:
+            case TAG_DATA_START_YEAR_DOWN:
+            case TAG_DATA_END_MONTH_UP:
+            case TAG_DATA_END_MONTH_DOWN:
+            case TAG_DATA_END_DAY_UP:
+            case TAG_DATA_END_DAY_DOWN:
+            case TAG_DATA_END_YEAR_UP:
+            case TAG_DATA_END_YEAR_DOWN:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
+            case TAG_DATA_VIEWBUTTON:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
+                }
+                break;
         }
     }
 }
@@ -468,7 +554,7 @@ static void EVE_cmd_customclock_burst(void) {
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_time.hour0);
     EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_time.hour1);
-    EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y + 1, 24, 0, ":");
+    EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y - 1, FONT_TIME, 0, ":");
     EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, FONT_TIME, 0, current_time.minute0);
     EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_time.minute1);
     EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, current_time.suffix);
@@ -485,10 +571,7 @@ static void EVE_cmd_statusbar_burst(void) {
     EVE_color_rgb_burst(BABY_BLUE);
     EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
     EVE_cmd_dl_burst(VERTEX2F(0 * 16, 0 * 16));
-    EVE_cmd_dl_burst(VERTEX2F(480 * 16, 40 * 16));
-
-    // Wi-Fi symbol
-    EVE_cmd_wifi_status_burst();
+    EVE_cmd_dl_burst(VERTEX2F(480 * 16, STATUS_BAR_HEIGHT * 16));
 
     // clock
     EVE_cmd_customclock_burst();
@@ -498,79 +581,237 @@ static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16
     EVE_color_rgb_burst(COLOR_RGB(100,100,100));
     EVE_cmd_dl_burst(LINE_WIDTH(8));
 
-    // draw the x-axis
+    // draw food x-axis
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
-    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, GRAPH_Y_BASE * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, GRAPH_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_FOOD_X_BASE * 16, GRAPH_FOOD_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_FOOD_X_BASE + GRAPH_X_LEN) * 16, GRAPH_FOOD_Y_BASE * 16));
 
-    // draw the y-axis
+    // draw water x-axis
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
-    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, GRAPH_Y_BASE * 16));
-    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, GRAPH_WATER_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + GRAPH_X_LEN) * 16, GRAPH_WATER_Y_BASE * 16));
+
+    // draw food y-axis
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_FOOD_X_BASE * 16, GRAPH_FOOD_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_FOOD_X_BASE * 16, (GRAPH_FOOD_Y_BASE - GRAPH_Y_LEN) * 16));
+
+    // draw water y-axis
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, GRAPH_WATER_Y_BASE * 16));
+    EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, (GRAPH_WATER_Y_BASE - GRAPH_Y_LEN) * 16));
 
     // draw horizontal gridlines
-    EVE_color_rgb_burst(COLOR_RGB(200,200,200));
+    EVE_color_rgb_burst(COLOR_RGB(220,220,220));
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
-    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE - GRAPH_Y_INTERVAL) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_Y_BASE - GRAPH_Y_INTERVAL) * 16));
-    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE - 2 * GRAPH_Y_INTERVAL) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_Y_BASE - 2 * GRAPH_Y_INTERVAL) * 16));
-    EVE_cmd_dl_burst(VERTEX2F(GRAPH_X_BASE * 16, (GRAPH_Y_BASE -  3 * GRAPH_Y_INTERVAL) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_Y_BASE - 3 * GRAPH_Y_INTERVAL) * 16));
+    for (int i = 1; i < 3; i++) {
+        EVE_cmd_dl_burst(VERTEX2F(GRAPH_FOOD_X_BASE * 16, (GRAPH_FOOD_Y_BASE - i * y_interval) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_FOOD_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_FOOD_Y_BASE - i * y_interval) * 16));
+        EVE_cmd_dl_burst(VERTEX2F(GRAPH_WATER_X_BASE * 16, (GRAPH_WATER_Y_BASE - i * y_interval) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + GRAPH_X_LEN) * 16, (GRAPH_WATER_Y_BASE - i * y_interval) * 16));
+    }
 
     // draw vertical gridlines
-    EVE_color_rgb_burst(COLOR_RGB(200,200,200));
+    EVE_color_rgb_burst(COLOR_RGB(220,220,220));
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_INTERVAL) * 16, GRAPH_Y_BASE * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + GRAPH_X_INTERVAL) * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 2 * GRAPH_X_INTERVAL) * 16, GRAPH_Y_BASE * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 2 * GRAPH_X_INTERVAL) * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 3 * GRAPH_X_INTERVAL) * 16, GRAPH_Y_BASE * 16));
-    EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + 3 * GRAPH_X_INTERVAL) * 16, (GRAPH_Y_BASE - GRAPH_Y_LEN) * 16));
+    for (int i = 1; i < 5; i++) {
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_FOOD_X_BASE + i * x_interval) * 16, GRAPH_FOOD_Y_BASE * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_FOOD_X_BASE + i * x_interval) * 16, (GRAPH_FOOD_Y_BASE - GRAPH_Y_LEN) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + i * x_interval) * 16, GRAPH_WATER_Y_BASE * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + i * x_interval) * 16, (GRAPH_WATER_Y_BASE - GRAPH_Y_LEN) * 16));
+    }
 
     // plot data
     EVE_color_rgb_burst(BLACK);
     EVE_cmd_dl_burst(LINE_WIDTH(12));
     for (int i = 0; i < (num_points - 1); i++) {
         EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
-        EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + x_data[i]) * 16, (GRAPH_Y_BASE - y_data[i]) * 16));
-        EVE_cmd_dl_burst(VERTEX2F((GRAPH_X_BASE + x_data[i+1]) * 16, (GRAPH_Y_BASE - y_data[i+1]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_FOOD_X_BASE + x_data[i]) * 16, (GRAPH_FOOD_Y_BASE - y_data[i]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_FOOD_X_BASE + x_data[i+1]) * 16, (GRAPH_FOOD_Y_BASE - y_data[i+1]) * 16));
+        EVE_cmd_dl_burst(DL_BEGIN | EVE_LINES);
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i]) * 16, (GRAPH_WATER_Y_BASE - y_data[i]) * 16));
+        EVE_cmd_dl_burst(VERTEX2F((GRAPH_WATER_X_BASE + x_data[i+1]) * 16, (GRAPH_WATER_Y_BASE - y_data[i+1]) * 16));
     }
 }
 
-static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
+static void EVE_cmd_keypad_burst(void) {
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_1);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_2);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_3);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_4);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_5);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_6);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_7);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_8);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_9);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_CLEAR);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_0);
+    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_ENTER);
+}
 
+static void EVE_cmd_date_select_burst(void) {
+    EVE_color_rgb_burst(COLOR_RGB(100,100,100));
+    EVE_cmd_text_burst(START_DATE_X, START_DATE_Y - DATE_HEIGHT - 40, FONT_DATE, 0, "START:");
+    EVE_cmd_text_burst(END_DATE_X, END_DATE_Y - DATE_HEIGHT - 40, FONT_DATE, 0, "END:");
+
+    EVE_color_rgb_burst(COLOR_RGB(230,230,230));
+    EVE_cmd_dl_burst(LINE_WIDTH(5 * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl_burst(VERTEX2F(START_DATE_X * 16, START_DATE_Y * 16));
+    EVE_cmd_dl_burst(VERTEX2F((START_DATE_X + DATE_WIDTH) * 16, (START_DATE_Y + DATE_HEIGHT) * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl_burst(VERTEX2F(END_DATE_X * 16, END_DATE_Y * 16));
+    EVE_cmd_dl_burst(VERTEX2F((END_DATE_X + DATE_WIDTH) * 16, (END_DATE_Y + DATE_HEIGHT) * 16));
+
+    EVE_color_rgb_burst(COLOR_RGB(80,80,80));
+    EVE_cmd_text_burst(START_DATE_X, START_DATE_Y, FONT_DATE, 0, start_month_str);
+    EVE_cmd_text_burst(START_DATE_X + 40, START_DATE_Y, FONT_DATE, 0, start_day_str);
+    EVE_cmd_text_burst(START_DATE_X + 70, START_DATE_Y, FONT_DATE, 0, start_year_str);
+    EVE_cmd_text_burst(END_DATE_X, END_DATE_Y, FONT_DATE, 0, end_month_str);
+    EVE_cmd_text_burst(END_DATE_X + 40, END_DATE_Y, FONT_DATE, 0, end_day_str);
+    EVE_cmd_text_burst(END_DATE_X + 70, END_DATE_Y, FONT_DATE, 0, end_year_str);
+}
+
+void EVE_cmd_down_triangle_burst(uint16_t x, uint16_t y) {
+    EVE_color_rgb_burst(WHITE);
+    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 5) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 5) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 11) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 5) * 16));
+}
+
+void EVE_cmd_up_triangle_burst(uint16_t x, uint16_t y) {
+    EVE_color_rgb_burst(WHITE);
+    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 11) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 11) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 5) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 11) * 16));
+}
+
+static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
     switch (tag_value) {
         case TAG_HOME_DATABUTTON:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(HOME_BUTTON_X, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, 28, toggle_state[tag_value], " ");
-            EVE_cmd_text_burst(HOME_BUTTON_X + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, FONT_PRIMARY, 0, "Data");
+            EVE_cmd_button_burst(HOME_BUTTON_X, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "View data");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_HOME_SCHEDULEBUTTON:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(2 * HOME_BUTTON_X + HOME_BUTTON_WIDTH, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
-            EVE_cmd_text_burst(2 * HOME_BUTTON_X + HOME_BUTTON_WIDTH + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, FONT_PRIMARY, 0, "Schedule");
+            EVE_cmd_button_burst(HOME_BUTTON_X, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT + 10, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Schedule");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_HOME_SETTINGSBUTTON:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(3 * HOME_BUTTON_X + 2 * HOME_BUTTON_WIDTH, HOME_BUTTON_Y, HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
-            EVE_cmd_text_burst(3 * HOME_BUTTON_X + 2 * HOME_BUTTON_WIDTH + 10, HOME_BUTTON_Y + HOME_BUTTON_HEIGHT - 30, FONT_PRIMARY, 0, "Settings");
+            EVE_cmd_button_burst(HOME_BUTTON_X, HOME_BUTTON_Y + 2 * (HOME_BUTTON_HEIGHT + 10), HOME_BUTTON_WIDTH, HOME_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Settings");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_START_MONTH_UP:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X1, DATA_Y1, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(DATA_X1, DATA_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_START_MONTH_DOWN:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X1, DATA_Y2, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_down_triangle_burst(DATA_X1, DATA_Y2);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_START_DAY_UP:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X2, DATA_Y1, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(DATA_X2, DATA_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_START_DAY_DOWN:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X2, DATA_Y2, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_down_triangle_burst(DATA_X2, DATA_Y2);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_START_YEAR_UP:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X3, DATA_Y1, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(DATA_X3, DATA_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_START_YEAR_DOWN:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X3, DATA_Y2, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_down_triangle_burst(DATA_X3, DATA_Y2);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_END_MONTH_UP:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X4, DATA_Y1, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(DATA_X4, DATA_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_END_MONTH_DOWN:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X4, DATA_Y2, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_down_triangle_burst(DATA_X4, DATA_Y2);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_END_DAY_UP:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X5, DATA_Y1, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(DATA_X5, DATA_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_END_DAY_DOWN:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X5, DATA_Y2, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_down_triangle_burst(DATA_X5, DATA_Y2);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_END_YEAR_UP:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X6, DATA_Y1, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(DATA_X6, DATA_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_END_YEAR_DOWN:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(DATA_X6, DATA_Y2, DATA_DATE_BUTTON_WIDTH, DATA_DATE_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_down_triangle_burst(DATA_X6, DATA_Y2);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_DATA_VIEWBUTTON:
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_button_burst(DATA_VIEWBUTTON_X, DATA_VIEWBUTTON_Y, DATA_VIEWBUTTON_WIDTH, DATA_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "View data");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_DATA_BACKBUTTON:
         case TAG_SCHEDULE_BACKBUTTON:
         case TAG_SETTINGS_BACKBUTTON:
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(BACK_BUTTON_X, BACK_BUTTON_Y, BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
             EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_button_burst(BACK_BUTTON_X, BACK_BUTTON_Y, BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
             EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
@@ -680,21 +921,6 @@ static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
             break;
     }
 }
-
-static void EVE_cmd_keypad_burst(void) {
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_1);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_2);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_3);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_4);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_5);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_6);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_7);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_8);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_9);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_CLEAR);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_0);
-    EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_ENTER);
-}
 /* ============================================================= */
 
 
@@ -756,14 +982,43 @@ static void TFT_data(void) {
                 screen_state = SCREENSTATE_HOME;
                 toggle_state[TAG_DATA_BACKBUTTON] = 0;
             }
+            else if (toggle_state[TAG_DATA_START_MONTH_UP] != 0)    { toggle_state[TAG_DATA_START_MONTH_UP] = 0; }
+            else if (toggle_state[TAG_DATA_START_MONTH_DOWN] != 0)  { toggle_state[TAG_DATA_START_MONTH_DOWN] = 0; }
+            else if (toggle_state[TAG_DATA_START_DAY_UP] != 0)      { toggle_state[TAG_DATA_START_DAY_UP] = 0; }
+            else if (toggle_state[TAG_DATA_START_DAY_DOWN] != 0)    { toggle_state[TAG_DATA_START_DAY_DOWN] = 0; }
+            else if (toggle_state[TAG_DATA_START_YEAR_UP] != 0)     { toggle_state[TAG_DATA_START_YEAR_UP] = 0; }
+            else if (toggle_state[TAG_DATA_START_YEAR_DOWN] != 0)   { toggle_state[TAG_DATA_START_YEAR_DOWN] = 0; }
+            else if (toggle_state[TAG_DATA_END_MONTH_UP] != 0)      { toggle_state[TAG_DATA_END_MONTH_UP] = 0; }
+            else if (toggle_state[TAG_DATA_END_MONTH_DOWN] != 0)    { toggle_state[TAG_DATA_END_MONTH_DOWN] = 0; }
+            else if (toggle_state[TAG_DATA_END_DAY_UP] != 0)        { toggle_state[TAG_DATA_END_DAY_UP] = 0; }
+            else if (toggle_state[TAG_DATA_END_DAY_DOWN] != 0)      { toggle_state[TAG_DATA_END_DAY_DOWN] = 0; }
+            else if (toggle_state[TAG_DATA_END_YEAR_UP] != 0)       { toggle_state[TAG_DATA_END_YEAR_UP] = 0; }
+            else if (toggle_state[TAG_DATA_END_YEAR_DOWN] != 0)     { toggle_state[TAG_DATA_END_YEAR_DOWN] = 0; }
+            else if (toggle_state[TAG_DATA_VIEWBUTTON] != 0)        { toggle_state[TAG_DATA_VIEWBUTTON] = 0; }
             lock_delay = 0;
         }
 
         EVE_cmd_statusbar_burst();
 
+        EVE_cmd_date_select_burst();
+
         EVE_cmd_display_graph_burst(x_data, y_data, num_points);
 
         EVE_cmd_custombutton_burst(TAG_DATA_BACKBUTTON);
+        EVE_cmd_custombutton_burst(TAG_DATA_START_MONTH_UP);
+        EVE_cmd_custombutton_burst(TAG_DATA_START_MONTH_DOWN);
+        EVE_cmd_custombutton_burst(TAG_DATA_START_DAY_UP);
+        EVE_cmd_custombutton_burst(TAG_DATA_START_DAY_DOWN);
+        EVE_cmd_custombutton_burst(TAG_DATA_START_YEAR_UP);
+        EVE_cmd_custombutton_burst(TAG_DATA_START_YEAR_DOWN);
+        EVE_cmd_custombutton_burst(TAG_DATA_END_MONTH_UP);
+        EVE_cmd_custombutton_burst(TAG_DATA_END_MONTH_DOWN);
+        EVE_cmd_custombutton_burst(TAG_DATA_END_DAY_UP);
+        EVE_cmd_custombutton_burst(TAG_DATA_END_DAY_DOWN);
+        EVE_cmd_custombutton_burst(TAG_DATA_END_YEAR_UP);
+        EVE_cmd_custombutton_burst(TAG_DATA_END_YEAR_DOWN);
+
+        EVE_cmd_custombutton_burst(TAG_DATA_VIEWBUTTON);
 
         EVE_cmd_dl_burst(DL_DISPLAY);
         EVE_cmd_dl_burst(CMD_SWAP);
