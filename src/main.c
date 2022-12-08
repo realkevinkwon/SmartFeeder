@@ -4,20 +4,17 @@
 #include "soc/rtc_wdt.h"
 #include "esp_log.h"
 
+// libaries for reading/writing internal flash memory
+#include "memory.h"
+#include "clock.h"
+
 // libraries for the LCD
 #include "EVE_target.h"
 #include "EVE_commands.h"
 #include "tft.h"
 
-// libaries for reading/writing internal flash memory
-#include "memory.h"
-
-// libaries for time-keeping
-#include "clock.h"
-
-// libaries for load cells
-#include "loadcell.h"
-#include "ultrasonic.h"
+#include "water_dispenser.h"
+#include "food_dispenser.h"
 
 void run_display(void* pvParameters) {
     uint32_t current_millis;
@@ -75,6 +72,16 @@ void app_main() {
     printf("Running clock_init() ... ");
     clock_init();
     printf("Done\n");
+
+    // initialize water dispenser
+    // printf("Running water_dispenser_init() ... ");
+    // water_dispenser_init();
+    // printf("Done\n");
+
+    // initialize food dispenser
+    // printf("Running food_dispenser_init() ... ");
+    // food_dispenser_init();
+    // printf("Done\n");
 
     xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);
     configASSERT(xHandle);

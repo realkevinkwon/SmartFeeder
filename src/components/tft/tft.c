@@ -5,6 +5,8 @@
 #include "memory.h"
 #include "clock.h"
 
+#include "food_dispenser.h"
+#include "water_dispenser.h"
 
 
 /* ############################# MACROS - BEGIN ############################# */

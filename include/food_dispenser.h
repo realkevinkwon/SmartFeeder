@@ -7,7 +7,7 @@
 #include <freertos/task.h>
 #include <driver/gpio.h>
 #include "stepper.h"
-#include "load_cell.h"
+#include "loadcell.h"
 
 #define FOOD_LC_init() LC1_init();
 #define FOOD_LC_to_grams(x) LC1_to_grams(x);

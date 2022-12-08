@@ -7,7 +7,7 @@
 #include <freertos/task.h>
 #include <driver/gpio.h>
 #include "solenoid.h"
-#include "load_cell.h"
+#include "loadcell.h"
 
 #define WATER_LC_init() LC2_init();
 #define WATER_LC_to_grams(x) LC2_to_grams(x);

@@ -45,8 +45,3 @@ void load_cell_test (void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
-
-void app_main()
-{
-    xTaskCreate(load_cell_test, "load_cell_test", configMINIMAL_STACK_SIZE * 5, NULL, 5, NULL);
-}
