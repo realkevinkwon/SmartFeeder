@@ -2,6 +2,7 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include "soc/rtc_wdt.h"
+#include "esp_log.h"
 
 // libraries for the LCD
 #include "EVE_target.h"
@@ -11,8 +12,8 @@
 // libaries for reading/writing internal flash memory
 #include "memory.h"
 
-// libraries for wi-fi
-#include "wifi.h"
+// libaries for time-keeping
+#include "clock.h"
 
 // libaries for load cells
 #include "loadcell.h"
@@ -70,13 +71,10 @@ void app_main() {
     memory_init();
     printf("Done\n");
 
-    // initialize read/write for internal memory
-    printf("Running wifi_init() ... ");
-    wifi_init();
+    // initialize time-keeping capabilities
+    printf("Running clock_init() ... ");
+    clock_init();
     printf("Done\n");
-
-    setenv("TZ", "EST5EDT,M3.2.0,M11.1.0", 1);
-    tzset();
 
     xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);
     configASSERT(xHandle);

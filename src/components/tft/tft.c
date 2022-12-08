@@ -4,7 +4,6 @@
 #include "tft_data.h"
 #include "memory.h"
 #include "clock.h"
-#include "wifi.h"
 
 
 
@@ -236,7 +235,7 @@ static void TFT_settings(void);
 
 
 /* === functions for initialization === */
-void touch_calibrate(void) {
+static void touch_calibrate(void) {
     EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00000CC1);
     EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000FE4c);
     EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFF6BA43);
@@ -428,15 +427,15 @@ void TFT_touch(void) {
 
 
 /* === helper functions === */
-int16_t getMinValue(int16_t* arr, uint16_t num_points) {
-    int16_t min_value = arr[0];
+static int16_t getMinValue(int16_t* arr, uint16_t num_points) {
+   int16_t min_value = arr[0];
     for (int i = 0; i < num_points; i++) {
         min_value = arr[i] < min_value ? arr[i] : min_value;
     }
     return min_value;
 }
 
-int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
+static int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
     int16_t max_value = arr[0];
     for (int i = 1; i < num_points; i++) {
         max_value = arr[i] > max_value ? arr[i] : max_value;
@@ -444,7 +443,7 @@ int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
     return max_value;
 }
 
-void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
 
     return;
 }
@@ -452,18 +451,18 @@ void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
 
 
 /* === functions for displaying graphical elements on-screen === */
-void EVE_cmd_loadimages(void) {
+static void EVE_cmd_loadimages(void) {
     EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi_32, sizeof(pic_wifi_32));
 }
 
-void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
+static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
     EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
     EVE_cmd_setbitmap_burst(addr, fmt, width, height);
     EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
     EVE_cmd_dl_burst(DL_END);
 }
 
-void EVE_cmd_customclock_burst(void) {
+static void EVE_cmd_customclock_burst(void) {
     update_time();
 
     EVE_color_rgb_burst(WHITE);
@@ -475,12 +474,12 @@ void EVE_cmd_customclock_burst(void) {
     EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, current_time.suffix);
 }
 
-void EVE_cmd_wifi_status_burst(void) {
+static void EVE_cmd_wifi_status_burst(void) {
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, WIFI_WIDTH, WIFI_HEIGHT, WIFI_X, WIFI_Y);
 }
 
-void EVE_cmd_statusbar_burst(void) {
+static void EVE_cmd_statusbar_burst(void) {
     // status bar background
     EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
     EVE_color_rgb_burst(BABY_BLUE);
@@ -495,7 +494,7 @@ void EVE_cmd_statusbar_burst(void) {
     EVE_cmd_customclock_burst();
 }
 
-void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
     EVE_color_rgb_burst(COLOR_RGB(100,100,100));
     EVE_cmd_dl_burst(LINE_WIDTH(8));
 
@@ -539,7 +538,7 @@ void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_
     }
 }
 
-void EVE_cmd_custombutton_burst(uint8_t tag_value) {
+static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
 
     switch (tag_value) {
         case TAG_HOME_DATABUTTON:
@@ -682,7 +681,7 @@ void EVE_cmd_custombutton_burst(uint8_t tag_value) {
     }
 }
 
-void EVE_cmd_keypad_burst(void) {
+static void EVE_cmd_keypad_burst(void) {
     EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_1);
     EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_2);
     EVE_cmd_custombutton_burst(TAG_SCHEDULE_KEY_3);
@@ -700,7 +699,7 @@ void EVE_cmd_keypad_burst(void) {
 
 
 /* === functions for each screen === */
-void TFT_home(void) {
+static void TFT_home(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
         EVE_cmd_dl_burst(CMD_DLSTART);
@@ -741,7 +740,7 @@ void TFT_home(void) {
     }
 }
 
-void TFT_data(void) {
+static void TFT_data(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
         EVE_cmd_dl_burst(CMD_DLSTART);
@@ -772,7 +771,7 @@ void TFT_data(void) {
     }
 }
 
-void TFT_schedule(void) {
+static void TFT_schedule(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
         EVE_cmd_dl_burst(CMD_DLSTART);
@@ -821,7 +820,7 @@ void TFT_schedule(void) {
     }
 }
 
-void TFT_settings(void) {
+static void TFT_settings(void) {
     if (tft_active != 0) {
         EVE_start_cmd_burst();
         EVE_cmd_dl_burst(CMD_DLSTART);

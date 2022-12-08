@@ -1,6 +1,9 @@
 #include "clock.h"
 
+#define TIMEZONE_DEFAULT "EST5EDT,M3.2.0,M11.1.0"
+
 time_t raw_time;
+struct timeval tv = { .tv_sec = 100000, .tv_usec = 0 };
 struct tm time_info;
 Time current_time = {
     .hour0 = 0,
@@ -9,13 +12,18 @@ Time current_time = {
     .minute1 = 0,
     .suffix = {'A','M','\0'}
 };
-char* time_zone = "EST5EDT,M3.2.0,M11.1.0";
 
 void clock_init(void) {
+    set_timezone(TIMEZONE_DEFAULT);
+}
 
+void set_timezone(const char* timezone) {
+    setenv("TZ", timezone, 1);
+    tzset();
 }
 
 void update_time(void) {
+
     // get the new raw time (time_t) and translate to time_info (struct tm)
     time(&raw_time);
     localtime_r(&raw_time, &time_info);
@@ -41,8 +49,4 @@ void update_time(void) {
 	current_time.minute1 = temp_minute - 10 * current_time.minute0;
     current_time.suffix[1] = 'M';
     current_time.suffix[2] = '\0';
-}
-
-void set_timezone(void) {
-
 }
