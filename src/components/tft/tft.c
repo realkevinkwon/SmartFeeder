@@ -548,6 +548,8 @@ static int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
 }
 
 static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+    int16_t y_max = getMaxValue(y_data, num_points);
+    
 
     return;
 }
