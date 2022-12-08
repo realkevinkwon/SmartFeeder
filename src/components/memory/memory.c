@@ -5,7 +5,7 @@
 
 #define STORAGE_NAMESPACE "storage"
 
-void mem_init(void) {
+void mem_initialization(void) {
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());

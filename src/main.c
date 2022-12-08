@@ -59,7 +59,7 @@ void app_main() {
     TFT_init();         // run FT813 (LCD graphics chip) initialization sequence
     printf("Done\n");
     printf("Running mem_init() ... ");
-    mem_init();         // initialize read/write for internal memory
+    mem_initialization();         // initialize read/write for internal memory
     printf("Done\n");
 
     xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);

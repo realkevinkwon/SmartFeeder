@@ -4,7 +4,7 @@
 #include <nvs.h>
 #include <nvs_flash.h>
 
-void mem_init(void);
+void mem_initialization(void);
 
 void mem_write(const char* namespace, uint32_t* new_data, size_t length);
 
