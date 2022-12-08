@@ -36,6 +36,7 @@
 #include "EVE.h"
 #include "tft_data.h"
 #include "memory.h"
+#include "wifi.h"
 
 
 
@@ -212,27 +213,6 @@ uint16_t display_list_size = 0;
 /* ========================= */
 
 
-/* === variables for the status bar === */
-typedef struct _Time {
-    uint8_t hour0;
-    uint8_t hour1;
-    uint8_t minute0;
-    uint8_t minute1;
-    char suffix[3];
-} Time;
-time_t raw_time;
-struct tm* time_info;
-Time current_time = {
-    .hour0 = 0,
-    .hour1 = 0,
-    .minute0 = 0,
-    .minute1 = 0,
-    .suffix = {'A','M','\0'}
-};
-/* ==================================== */
-
-
-
 /* === variables for input and output === */
 char input[255] = "";
 size_t input_length = 0;
@@ -270,7 +250,6 @@ static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, ui
 
 static void EVE_cmd_statusbar_burst(void);
 static void EVE_cmd_customclock_burst(void);
-static void updateTime(void);
 static void EVE_cmd_wifi_status_burst(void);
 
 static int16_t getMinValue(int16_t* arr, uint16_t num_points);
@@ -501,35 +480,6 @@ void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
 
     return;
 }
-
-void updateTime(void) {
-    // get the new raw time
-    time(&raw_time);
-
-    // translate raw_time (time_t) to time_info (struct tm*)
-    time_info = localtime(&raw_time);
-    uint8_t temp_hour = time_info->tm_hour;
-    uint8_t temp_minute = time_info->tm_min;
-
-    // translate 24-hour time to 12-hour time
-    if (temp_hour >= 0 && temp_hour <= 12) {
-        if (temp_hour == 0) {
-            temp_hour = 12;
-        }
-        current_time.suffix[0] = 'A';
-    }
-    else {
-        temp_hour -= 12;
-        current_time.suffix[0] = 'P';
-    }
-
-    current_time.hour0 = temp_hour / 10;
-    current_time.hour1 = temp_hour - 10 * current_time.hour0;
-    current_time.minute0 = temp_minute / 10;
-	current_time.minute1 = temp_minute - 10 * current_time.minute0;
-    current_time.suffix[1] = 'M';
-    current_time.suffix[2] = '\0';
-}
 /* ======================== */
 
 
@@ -546,7 +496,7 @@ void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t 
 }
 
 void EVE_cmd_customclock_burst(void) {
-    updateTime();
+    update_time();
 
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_time.hour0);

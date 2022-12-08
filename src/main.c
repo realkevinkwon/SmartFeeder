@@ -11,6 +11,9 @@
 // libaries for reading/writing internal flash memory
 #include "memory.h"
 
+// libraries for wi-fi
+#include "wifi.h"
+
 // libaries for load cells
 #include "loadcell.h"
 #include "ultrasonic.h"
@@ -52,15 +55,28 @@ void run_display(void* pvParameters) {
 void app_main() {
     TaskHandle_t xHandle = NULL;
 
+    // initialize LCD as SPI device
     printf("\nRunning EVE_init_spi() ... \n");
-    EVE_init_spi();     // initialize LCD as SPI device
+    EVE_init_spi();
     printf("Done\n");
+
+    // run FT813 (LCD graphics chip) initialization sequence
     printf("Running TFT_init() ... ");
-    TFT_init();         // run FT813 (LCD graphics chip) initialization sequence
+    TFT_init();
     printf("Done\n");
-    printf("Running mem_init() ... ");
-    mem_initialization();         // initialize read/write for internal memory
+
+    // initialize read/write for internal memory
+    printf("Running mem_initialization() ... ");
+    mem_initialization();
     printf("Done\n");
+
+    // initialize read/write for internal memory
+    printf("Running wifi_init() ... ");
+    wifi_init();
+    printf("Done\n");
+
+    setenv("TZ", "EST5EDT,M3.2.0,M11.1.0", 1);
+    tzset();
 
     xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);
     configASSERT(xHandle);
