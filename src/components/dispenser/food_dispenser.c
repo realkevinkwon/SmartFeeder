@@ -1,7 +1,7 @@
 #include "food_dispenser.h"
 
 // Tag for logging
-// static const char *TAG = "Food Dispenser";
+static const char *TAG = "Food Dispenser";
 
 hx711_t load_cell;
 
@@ -28,4 +28,13 @@ void fill_food_to_amount(float amount) {
     step_to_angle(FOOD_DISPENSER_OPEN_ANGLE);
     vTaskDelay(open_time / portTICK_PERIOD_MS);
     step_to_angle(FOOD_DISPENSER_CLOSED_ANGLE);
+}
+
+void food_dispenser_calibration() {
+    float initial_level = get_food_level();
+    step_to_angle(FOOD_DISPENSER_OPEN_ANGLE);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    step_to_angle(FOOD_DISPENSER_CLOSED_ANGLE);
+    float final_level = get_food_level();
+    ESP_LOGI(TAG, "Amount: %fg", final_level - initial_level);
 }
