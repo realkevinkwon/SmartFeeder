@@ -13,6 +13,10 @@
 /* ############################# MACROS - BEGIN ############################# */
 #define TEST_UTF8 0
 #define DISPLAY_ORIENTATION 0
+#define MEM_FONT 0x000f7e00
+#define MEM_LOGO 0x000f8000
+#define MEM_PIC1 0x000fa000
+#define LAYOUT_Y1 66
 #define MEM_DL_STATIC (EVE_RAM_G_SIZE - 4096) /* 0xff000 - start-address of the static part of the display-list, upper 4k of gfx-mem */
 
 
@@ -448,17 +452,71 @@ static void touch_calibrate(void) {
 #endif
 }
 
-void TFT_init(void)
-{
+void initStaticBackground(void) {
+    EVE_cmd_dl(CMD_DLSTART); /* Start the display list */
+
+    EVE_cmd_dl(TAG(0)); /* do not use the following objects for touch-detection */
+
+    EVE_cmd_bgcolor(0x00c0c0c0); /* light grey */
+
+    EVE_cmd_dl(VERTEX_FORMAT(0)); /* reduce precision for VERTEX2F to 1 pixel instead of 1/16 pixel default */
+
+    /* draw a rectangle on top */
+    EVE_cmd_dl(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl(LINE_WIDTH(1*16)); /* size is in 1/16 pixel */
+
+    EVE_cmd_dl(DL_COLOR_RGB | BABY_BLUE);
+    EVE_cmd_dl(VERTEX2F(0,0));
+    EVE_cmd_dl(VERTEX2F(EVE_HSIZE,LAYOUT_Y1-2));
+    EVE_cmd_dl(DL_END);
+
+    /* display the logo */
+    EVE_cmd_dl(DL_COLOR_RGB | WHITE);
+    EVE_cmd_dl(DL_BEGIN | EVE_BITMAPS);
+    EVE_cmd_setbitmap(MEM_LOGO, EVE_ARGB1555, 56, 56);
+    EVE_cmd_dl(VERTEX2F(EVE_HSIZE - 58, 5));
+    EVE_cmd_dl(DL_END);
+
+    /* draw a black line to separate things */
+    EVE_cmd_dl(DL_COLOR_RGB | BLACK);
+    EVE_cmd_dl(DL_BEGIN | EVE_LINES);
+    EVE_cmd_dl(VERTEX2F(0,LAYOUT_Y1-2));
+    EVE_cmd_dl(VERTEX2F(EVE_HSIZE,LAYOUT_Y1-2));
+    EVE_cmd_dl(DL_END);
+
+#if (TEST_UTF8 != 0) && (EVE_GEN > 2)
+    EVE_cmd_setfont2(12,MEM_FONT,32); /* assign bitmap handle to a custom font */
+    EVE_cmd_text(EVE_HSIZE/2, 15, 12, EVE_OPT_CENTERX, "EVE Demo");
+#else
+    EVE_cmd_text(EVE_HSIZE/2, 15, 29, EVE_OPT_CENTERX, "EVE Demo");
+#endif
+
+    /* add the static text to the list */
+#if defined (EVE_DMA)
+    EVE_cmd_text(10, EVE_VSIZE - 65, 26, 0, "Bytes:");
+#endif
+    EVE_cmd_text(10, EVE_VSIZE - 50, 26, 0, "DL-size:");
+    EVE_cmd_text(10, EVE_VSIZE - 35, 26, 0, "Time1:");
+    EVE_cmd_text(10, EVE_VSIZE - 20, 26, 0, "Time2:");
+
+    EVE_cmd_text(105, EVE_VSIZE - 35, 26, 0, "us");
+    EVE_cmd_text(105, EVE_VSIZE - 20, 26, 0, "us");
+
+    EVE_execute_cmd();
+
+    num_dl_static = EVE_memRead16(REG_CMD_DL);
+
+    EVE_cmd_memcpy(MEM_DL_STATIC, EVE_RAM_DL, num_dl_static);
+    EVE_execute_cmd();
+}
+
+void TFT_init(void) {
     if(E_OK == EVE_init())
     {
         tft_active = 1;
         for (int i = 0; i < 255; i++) {
             toggle_state[i] = 0;
         }
-
-        curr_hour = 10 * current_time.hour0 + current_time.hour1;
-        curr_minute = 10 * current_time.minute0 + current_time.minute1;
 
         EVE_memWrite8(REG_PWM_DUTY, 0x30);  /* setup backlight, range is from 0 = off to 0x80 = max */
 
@@ -467,6 +525,8 @@ void TFT_init(void)
         EVE_cmd_loadimages();
         
         EVE_cmd_setrotate(DISPLAY_ORIENTATION);
+
+        initStaticBackground();
     }
 }
 /* ==================================== */
