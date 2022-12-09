@@ -52,11 +52,14 @@ void run_display(void* pvParameters) {
 }
 
 void app_main() {
-    // TaskHandle_t xHandle = NULL;
+    TaskHandle_t xHandle = NULL;
     // initialize solenoid first
-    // printf("\nRunning solenoid_init() ... ");
-    // solenoid_init();
-    // printf("Done\n");
+    printf("\nRunning solenoid_init() ... ");
+    solenoid_init();
+    printf("Done\n");
+
+    gpio_reset_pin(GPIO_NUM_26);
+    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_INPUT);
 
     // initialize LCD as SPI device
     printf("Running EVE_init_spi() ... \n");
@@ -64,19 +67,19 @@ void app_main() {
     printf("Done\n");
 
     // run FT813 (LCD graphics chip) initialization sequence
-    // printf("Running TFT_init() ... ");
-    // TFT_init();
-    // printf("Done\n");
+    printf("Running TFT_init() ... ");
+    TFT_init();
+    printf("Done\n");
 
     // initialize read/write for internal memory
-    // printf("Running memory_init() ... ");
-    // memory_init();
-    // printf("Done\n");
+    printf("Running memory_init() ... ");
+    memory_init();
+    printf("Done\n");
 
     // initialize time-keeping capabilities
-    // printf("Running clock_init() ... ");
-    // clock_init();
-    // printf("Done\n");
+    printf("Running clock_init() ... ");
+    clock_init();
+    printf("Done\n");
 
     // initialize water dispenser
     // printf("Running water_dispenser_init() ... ");
@@ -88,6 +91,6 @@ void app_main() {
     // food_dispenser_init();
     // printf("Done\n");
 
-    // xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);
-    // configASSERT(xHandle);
+    xTaskCreate(run_display, "run_display", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY, &xHandle);
+    configASSERT(xHandle);
 }

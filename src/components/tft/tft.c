@@ -13,10 +13,6 @@
 /* ############################# MACROS - BEGIN ############################# */
 #define TEST_UTF8 0
 #define DISPLAY_ORIENTATION 0
-#define MEM_FONT 0x000f7e00
-#define MEM_LOGO 0x000f8000
-#define MEM_PIC1 0x000fa000
-#define LAYOUT_Y1 66
 #define MEM_DL_STATIC (EVE_RAM_G_SIZE - 4096) /* 0xff000 - start-address of the static part of the display-list, upper 4k of gfx-mem */
 
 
@@ -175,7 +171,7 @@
 
 /* data screen buttons */
 #define DATA_OFFSET 133
-#define DATA_DATE_BUTTON_HEIGHT 16
+#define DATA_DATE_BUTTON_HEIGHT 20
 #define DATA_DATE_BUTTON_WIDTH 24
 #define DATA_X1 START_DATE_X
 #define DATA_X2 (DATA_X1 + 35)
@@ -212,8 +208,8 @@
 #define TIME_X5 (TIME_X4 + 38)
 #define TIME_X6 (TIME_X5 + 35)
 
-#define TIME_Y1 (TIME_TEXT_Y - 30)
-#define TIME_Y2 (TIME_TEXT_Y + 40)
+#define TIME_Y1 (TIME_TEXT_Y - 33)
+#define TIME_Y2 (TIME_TEXT_Y + 37)
 
 /* demo screen */
 #define DEMO_BUTTON_X 20
@@ -312,28 +308,6 @@ uint8_t toggle_lock = 0;                    // allows only one touch target to b
 
 
 /* === variables related to drawing graphs === */
-char curr_month_str[4] = "JAN";
-char curr_day_str[3] = "01";
-char curr_year_str[5] = "2022";
-char start_year_str[5] = "2022";
-char start_month_str[4] = "JAN";
-char start_day_str[3] = "01";
-char end_year_str[5] = "2022";
-char end_month_str[4] = "JAN";
-char end_day_str[3] = "02";
-
-uint16_t start_year = 2022;
-uint16_t start_month = 1;
-uint16_t start_day = 1;
-uint16_t end_year = 2022;
-uint16_t end_month = 1;
-uint16_t end_day = 2;
-uint16_t curr_year = 2022;
-uint16_t curr_month = 12;
-uint16_t curr_day = 8;
-uint16_t curr_hour = 7;
-uint16_t curr_minute = 12;
-
 uint16_t num_points = 10;
 uint16_t x_interval = 50;
 uint16_t y_interval = 50;
@@ -360,18 +334,18 @@ static void EVE_cmd_statusbar_burst(void);
 static void EVE_cmd_customclock_burst(void);
 static void EVE_cmd_wifi_status_burst(void);
 
-static void increaseYear(uint16_t* year);
-static void decreaseYear(uint16_t* year);
-static void increaseMonth(uint16_t* month);
-static void decreaseMonth(uint16_t* month);
-static void increaseDay(uint16_t* day);
-static void decreaseDay(uint16_t* day);
+static void increaseYear(Date* date);
+static void decreaseYear(Date* date);
+static void increaseMonth(Date* date);
+static void decreaseMonth(Date* date);
+static void increaseDay(Date* date);
+static void decreaseDay(Date* date);
 
-static void increaseHour(uint16_t* hour);
-static void decreaseHour(uint16_t* hour);
-static void increaseMinute(uint16_t* minute);
-static void decreaseMinute(uint16_t* minute);
-static void toggleSuffix(char* suffix);
+static void increaseHour(Date* date);
+static void decreaseHour(Date* date);
+static void increaseMinute(Date* date);
+static void decreaseMinute(Date* date);
+static void toggleSuffix(Date* date);
 
 static int16_t getMinValue(int16_t* arr, uint16_t num_points);
 static int16_t getMaxValue(int16_t* arr, uint16_t num_points);
@@ -452,64 +426,6 @@ static void touch_calibrate(void) {
 #endif
 }
 
-void initStaticBackground(void) {
-    EVE_cmd_dl(CMD_DLSTART); /* Start the display list */
-
-    EVE_cmd_dl(TAG(0)); /* do not use the following objects for touch-detection */
-
-    EVE_cmd_bgcolor(0x00c0c0c0); /* light grey */
-
-    EVE_cmd_dl(VERTEX_FORMAT(0)); /* reduce precision for VERTEX2F to 1 pixel instead of 1/16 pixel default */
-
-    /* draw a rectangle on top */
-    EVE_cmd_dl(DL_BEGIN | EVE_RECTS);
-    EVE_cmd_dl(LINE_WIDTH(1*16)); /* size is in 1/16 pixel */
-
-    EVE_cmd_dl(DL_COLOR_RGB | BABY_BLUE);
-    EVE_cmd_dl(VERTEX2F(0,0));
-    EVE_cmd_dl(VERTEX2F(EVE_HSIZE,LAYOUT_Y1-2));
-    EVE_cmd_dl(DL_END);
-
-    /* display the logo */
-    EVE_cmd_dl(DL_COLOR_RGB | WHITE);
-    EVE_cmd_dl(DL_BEGIN | EVE_BITMAPS);
-    EVE_cmd_setbitmap(MEM_LOGO, EVE_ARGB1555, 56, 56);
-    EVE_cmd_dl(VERTEX2F(EVE_HSIZE - 58, 5));
-    EVE_cmd_dl(DL_END);
-
-    /* draw a black line to separate things */
-    EVE_cmd_dl(DL_COLOR_RGB | BLACK);
-    EVE_cmd_dl(DL_BEGIN | EVE_LINES);
-    EVE_cmd_dl(VERTEX2F(0,LAYOUT_Y1-2));
-    EVE_cmd_dl(VERTEX2F(EVE_HSIZE,LAYOUT_Y1-2));
-    EVE_cmd_dl(DL_END);
-
-#if (TEST_UTF8 != 0) && (EVE_GEN > 2)
-    EVE_cmd_setfont2(12,MEM_FONT,32); /* assign bitmap handle to a custom font */
-    EVE_cmd_text(EVE_HSIZE/2, 15, 12, EVE_OPT_CENTERX, "EVE Demo");
-#else
-    EVE_cmd_text(EVE_HSIZE/2, 15, 29, EVE_OPT_CENTERX, "EVE Demo");
-#endif
-
-    /* add the static text to the list */
-#if defined (EVE_DMA)
-    EVE_cmd_text(10, EVE_VSIZE - 65, 26, 0, "Bytes:");
-#endif
-    EVE_cmd_text(10, EVE_VSIZE - 50, 26, 0, "DL-size:");
-    EVE_cmd_text(10, EVE_VSIZE - 35, 26, 0, "Time1:");
-    EVE_cmd_text(10, EVE_VSIZE - 20, 26, 0, "Time2:");
-
-    EVE_cmd_text(105, EVE_VSIZE - 35, 26, 0, "us");
-    EVE_cmd_text(105, EVE_VSIZE - 20, 26, 0, "us");
-
-    EVE_execute_cmd();
-
-    num_dl_static = EVE_memRead16(REG_CMD_DL);
-
-    EVE_cmd_memcpy(MEM_DL_STATIC, EVE_RAM_DL, num_dl_static);
-    EVE_execute_cmd();
-}
-
 void TFT_init(void) {
     if(E_OK == EVE_init())
     {
@@ -525,8 +441,6 @@ void TFT_init(void) {
         EVE_cmd_loadimages();
         
         EVE_cmd_setrotate(DISPLAY_ORIENTATION);
-
-        initStaticBackground();
     }
 }
 /* ==================================== */
@@ -565,11 +479,27 @@ void TFT_touch(void) {
             case TAG_SETTINGS_BACKBUTTON:
             case TAG_TIME_BACKBUTTON:
             case TAG_SETTINGS_DEMOBUTTON:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_BUTTON;
+                }
+                break;
             case TAG_SETTINGS_TIMEBUTTON:
                 if (0 == toggle_lock) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_BUTTON;
+                    new_date.year = current_date.year;
+                    new_date.month = current_date.month;
+                    new_date.day = current_date.day;
+                    new_date.hour = current_date.hour;
+                    new_date.minute = current_date.minute;
+                    update_year_view(&new_date, &new_date_view);
+                    update_month_view(&new_date, &new_date_view);
+                    update_day_view(&new_date, &new_date_view);
+                    update_hour_view(&new_date, &new_date_view);
+                    update_minute_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_SETBUTTON:
@@ -577,7 +507,7 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_BUTTON;
-                    set_time(curr_year, curr_month, curr_day, curr_hour, curr_minute, current_time.suffix);
+                    // set_time(curr_year, curr_month, curr_day, curr_hour, curr_minute, current_time.suffix);
                 }
                 break;
             case TAG_SCHEDULE_KEY_0:
@@ -655,8 +585,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseMonth(&start_month);
-                    update_month_str(start_month_str, start_month);
                 }
                 break;
             case TAG_DATA_START_MONTH_DOWN:
@@ -664,8 +592,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseMonth(&start_month);
-                    update_month_str(start_month_str, start_month);
                 }
                 break;
             case TAG_DATA_START_DAY_UP:
@@ -673,8 +599,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseDay(&start_day);
-                    update_day_str(start_day_str, start_day);
                 }
                 break;
             case TAG_DATA_START_DAY_DOWN:
@@ -682,8 +606,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseDay(&start_day);
-                    update_day_str(start_day_str, start_day);
                 }
                 break;
             case TAG_DATA_START_YEAR_UP:
@@ -691,8 +613,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseYear(&start_year);
-                    update_year_str(start_year_str, start_year);
                 }
                 break;
             case TAG_DATA_START_YEAR_DOWN:
@@ -700,8 +620,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseYear(&start_year);
-                    update_year_str(start_year_str, start_year);
                 }
                 break;
             case TAG_DATA_END_MONTH_UP:
@@ -709,8 +627,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseMonth(&end_month);
-                    update_month_str(end_month_str, end_month);
                 }
                 break;
             case TAG_DATA_END_MONTH_DOWN:
@@ -718,8 +634,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseMonth(&end_month);
-                    update_month_str(end_month_str, end_month);
                 }
                 break;
             case TAG_DATA_END_DAY_UP:
@@ -727,8 +641,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseDay(&end_day);
-                    update_day_str(end_day_str, end_day);
                 }
                 break;
             case TAG_DATA_END_DAY_DOWN:
@@ -736,8 +648,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseDay(&end_day);
-                    update_day_str(end_day_str, end_day);
                 }
                 break;
             case TAG_DATA_END_YEAR_UP:
@@ -745,8 +655,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseYear(&end_year);
-                    update_year_str(end_year_str, end_year);
                 }
                 break;
             case TAG_DATA_END_YEAR_DOWN:
@@ -754,8 +662,6 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseYear(&end_year);
-                    update_year_str(end_year_str, end_year);
                 }
                 break;
             case TAG_DATA_VIEWBUTTON:
@@ -764,8 +670,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseMonth(&curr_month);
-                    update_month_str(curr_month_str, curr_month);
+                    increaseMonth(&new_date);
+                    update_month_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_MONTH_DOWN:
@@ -773,8 +679,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseMonth(&curr_month);
-                    update_month_str(curr_month_str, curr_month);
+                    decreaseMonth(&new_date);
+                    update_month_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_DAY_UP:
@@ -782,8 +688,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseDay(&curr_day);
-                    update_day_str(curr_day_str, curr_day);
+                    increaseDay(&new_date);
+                    update_day_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_DAY_DOWN:
@@ -791,8 +697,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseDay(&curr_day);
-                    update_day_str(curr_day_str, curr_day);
+                    decreaseDay(&new_date);
+                    update_day_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_YEAR_UP:
@@ -800,8 +706,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseYear(&curr_year);
-                    update_year_str(curr_year_str, curr_year);
+                    increaseYear(&new_date);
+                    update_year_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_YEAR_DOWN:
@@ -809,8 +715,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseYear(&curr_year);
-                    update_year_str(curr_year_str, curr_year);
+                    decreaseYear(&new_date);
+                    update_year_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_HOUR_UP:
@@ -818,7 +724,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseHour(&curr_hour);
+                    increaseHour(&new_date);
+                    update_hour_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_HOUR_DOWN:
@@ -826,7 +733,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseHour(&curr_hour);
+                    decreaseHour(&new_date);
+                    update_hour_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_MINUTE_UP:
@@ -834,7 +742,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    increaseMinute(&curr_minute);
+                    increaseMinute(&new_date);
+                    update_minute_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_MINUTE_DOWN:
@@ -842,7 +751,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    decreaseMinute(&curr_minute);
+                    decreaseMinute(&new_date);
+                    update_minute_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_TIME_AMPM_UP:
@@ -851,7 +761,8 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
-                    toggleSuffix(current_time.suffix);
+                    toggleSuffix(&new_date);
+                    update_hour_view(&new_date, &new_date_view);
                 }
                 break;
             case TAG_DEMO_WATERBUTTON:
@@ -869,48 +780,52 @@ void TFT_touch(void) {
 
 
 /* === helper functions === */
-static void increaseMonth(uint16_t* month) {
-    *month = *month == 12 ? 1 : *month + 1;
+static void increaseMonth(Date* date) {
+    date->month = date->month == 12 ? 1 : date->month + 1;
 }
 
-static void decreaseMonth(uint16_t* month) {
-    *month = *month == 1 ? 12 : *month - 1;
+static void decreaseMonth(Date* date) {
+    date->month = date->month == 1 ? 12 : date->month - 1;
 }
 
-static void increaseYear(uint16_t* year) {
-    (*year)++;
+static void increaseYear(Date* date) {
+    date->year += 1;
 }
 
-static void decreaseYear(uint16_t* year) {
-    (*year)--;
+static void decreaseYear(Date* date) {
+    date->year -= 1;
 }
 
-static void increaseDay(uint16_t* day) {
-    (*day)++;
+static void increaseDay(Date* date) {
+    date->day = date->day == 30 ? 1 : date->day + 1;
 }
 
-static void decreaseDay(uint16_t* day) {
-    (*day)--;
+static void decreaseDay(Date* date) {
+    date->day = date->day == 1 ? 30 : date->day - 1;
 }
 
-static void increaseHour(uint16_t* hour) {
-    *hour = *hour == 12 ? 1 : *hour + 1;
+static void increaseHour(Date* date) {
+    date->hour = date->hour == 23 ? 0 : date->hour + 1;
 }
 
-static void decreaseHour(uint16_t* hour) {
-    *hour = *hour == 1 ? 12 : *hour - 1;
+static void decreaseHour(Date* date) {
+    date->hour = date->hour == 0 ? 23 : date->hour - 1;
 }
 
-static void increaseMinute(uint16_t* minute) {
-    *minute = *minute == 59 ? 0 : *minute + 1;
+static void increaseMinute(Date* date) {
+    date->minute = date->minute == 59 ? 0 : date->minute + 1;
 }
 
-static void decreaseMinute(uint16_t* minute) {
-    *minute = *minute == 0 ? 59 : *minute - 1;
+static void decreaseMinute(Date* date) {
+    date->minute = date->minute == 0 ? 59 : date->minute - 1;
 }
 
-static void toggleSuffix(char* suffix) {
-    suffix[0] = suffix[0] == 'A' ? 'P' : 'A';
+static void toggleSuffix(Date* date) {
+    uint16_t temp_hour = date->hour + 12;
+    if (temp_hour > 23) {
+        temp_hour -= 24;
+    }
+    date->hour = temp_hour;
 }
 
 static int16_t getMinValue(int16_t* arr, uint16_t num_points) {
@@ -954,12 +869,12 @@ static void EVE_cmd_customclock_burst(void) {
     update_time();
 
     EVE_color_rgb_burst(WHITE);
-    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_time.hour0);
-    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_time.hour1);
+    EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_date_view.hour0);
+    EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_date_view.hour1);
     EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y - 1, FONT_TIME, 0, ":");
-    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, FONT_TIME, 0, current_time.minute0);
-    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_time.minute1);
-    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, current_time.suffix);
+    EVE_cmd_number_burst(CLOCK_X2, CLOCK_Y, FONT_TIME, 0, current_date_view.minute0);
+    EVE_cmd_number_burst(CLOCK_X2 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_date_view.minute1);
+    EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, current_date_view.suffix);
 }
 
 static void EVE_cmd_wifi_status_burst(void) {
@@ -1113,17 +1028,17 @@ static void EVE_cmd_set_range_burst(void) {
     EVE_cmd_dl_burst(VERTEX2F((END_DATE_X + DATE_WIDTH) * 16, (END_DATE_Y + DATE_HEIGHT) * 16));
 
     EVE_color_rgb_burst(COLOR_RGB(80,80,80));
-    EVE_cmd_text_burst(START_DATE_X, START_DATE_Y, FONT_DATE, 0, start_month_str);
-    EVE_cmd_text_burst(START_DATE_X + 40, START_DATE_Y, FONT_DATE, 0, start_day_str);
-    EVE_cmd_text_burst(START_DATE_X + 70, START_DATE_Y, FONT_DATE, 0, start_year_str);
-    EVE_cmd_text_burst(END_DATE_X, END_DATE_Y, FONT_DATE, 0, end_month_str);
-    EVE_cmd_text_burst(END_DATE_X + 40, END_DATE_Y, FONT_DATE, 0, end_day_str);
-    EVE_cmd_text_burst(END_DATE_X + 70, END_DATE_Y, FONT_DATE, 0, end_year_str);
+    EVE_cmd_text_burst(START_DATE_X, START_DATE_Y, FONT_DATE, 0, start_date_view.month);
+    EVE_cmd_text_burst(START_DATE_X + 40, START_DATE_Y, FONT_DATE, 0, start_date_view.day);
+    EVE_cmd_text_burst(START_DATE_X + 70, START_DATE_Y, FONT_DATE, 0, start_date_view.year);
+    EVE_cmd_text_burst(END_DATE_X, END_DATE_Y, FONT_DATE, 0, end_date_view.month);
+    EVE_cmd_text_burst(END_DATE_X + 40, END_DATE_Y, FONT_DATE, 0, end_date_view.day);
+    EVE_cmd_text_burst(END_DATE_X + 70, END_DATE_Y, FONT_DATE, 0, end_date_view.year);
 }
 
 static void EVE_cmd_set_date_burst(void) {
     EVE_color_rgb_burst(COLOR_RGB(100,100,100));
-    EVE_cmd_text_burst(50, 50, FONT_PRIMARY, 0, "Adjust date and time:");
+    EVE_cmd_text_burst(140, 50, FONT_PRIMARY, 0, "Adjust date and time:");
 
     EVE_color_rgb_burst(COLOR_RGB(230,230,230));
     EVE_cmd_dl_burst(LINE_WIDTH(5 * 16));
@@ -1132,35 +1047,35 @@ static void EVE_cmd_set_date_burst(void) {
     EVE_cmd_dl_burst(VERTEX2F((TIME_TEXT_X + TIME_TEXT_WIDTH) * 16, (TIME_TEXT_Y + TIME_TEXT_HEIGHT) * 16));
 
     EVE_color_rgb_burst(COLOR_RGB(80,80,80));
-    EVE_cmd_text_burst(TIME_X1, TIME_TEXT_Y, FONT_PRIMARY, 0, curr_month_str);
-    EVE_cmd_text_burst(TIME_X2, TIME_TEXT_Y, FONT_PRIMARY, 0, curr_day_str);
-    EVE_cmd_text_burst(TIME_X3, TIME_TEXT_Y, FONT_PRIMARY, 0, curr_year_str);
-    EVE_cmd_number_burst(TIME_X4, TIME_TEXT_Y, FONT_PRIMARY, 0, current_time.hour0);
-    EVE_cmd_number_burst(TIME_X4 + 12, TIME_TEXT_Y, FONT_PRIMARY, 0, current_time.hour1);
+    EVE_cmd_text_burst(TIME_X1, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.month);
+    EVE_cmd_text_burst(TIME_X2, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.day);
+    EVE_cmd_text_burst(TIME_X3, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.year);
+    EVE_cmd_number_burst(TIME_X4, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.hour0);
+    EVE_cmd_number_burst(TIME_X4 + 12, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.hour1);
     EVE_cmd_text_burst(TIME_X5 - 10, TIME_TEXT_Y - 2, FONT_PRIMARY, 0, ":");
-    EVE_cmd_number_burst(TIME_X5, TIME_TEXT_Y, FONT_PRIMARY, 0, current_time.minute0);
-    EVE_cmd_number_burst(TIME_X5 + 12, TIME_TEXT_Y, FONT_PRIMARY, 0, current_time.minute1);
-    EVE_cmd_text_burst(TIME_X6, TIME_TEXT_Y, FONT_PRIMARY, 0, current_time.suffix);
+    EVE_cmd_number_burst(TIME_X5, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.minute0);
+    EVE_cmd_number_burst(TIME_X5 + 12, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.minute1);
+    EVE_cmd_text_burst(TIME_X6, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.suffix);
 }
 
 void EVE_cmd_down_triangle_burst(uint16_t x, uint16_t y) {
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
-    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 5) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 5) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 11) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 5) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 6) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 12) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
 }
 
 void EVE_cmd_up_triangle_burst(uint16_t x, uint16_t y) {
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
-    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 11) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 11) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 5) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 11) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 12) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 12) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 6) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 12) * 16));
 }
 
 static void EVE_cmd_custombutton_burst(uint8_t tag_value) {
