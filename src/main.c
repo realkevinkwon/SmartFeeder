@@ -15,6 +15,7 @@
 
 #include "water_dispenser.h"
 #include "food_dispenser.h"
+#include "solenoid.h"
 
 void run_display(void* pvParameters) {
     uint32_t current_millis;
@@ -52,9 +53,13 @@ void run_display(void* pvParameters) {
 
 void app_main() {
     TaskHandle_t xHandle = NULL;
+    // initialize solenoid first
+    // printf("\nRunning solenoid_init() ... ");
+    // solenoid_init();
+    // printf("Done\n");
 
     // initialize LCD as SPI device
-    printf("\nRunning EVE_init_spi() ... \n");
+    printf("Running EVE_init_spi() ... \n");
     EVE_init_spi();
     printf("Done\n");
 
