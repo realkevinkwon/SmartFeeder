@@ -8,6 +8,7 @@ hx711_t load_cell;
 void water_dispenser_init() {
     solenoid_init();
     load_cell = WATER_LC_init();
+    WATER_LC_calibration(load_cell);
 }
 
 float get_water_level() {

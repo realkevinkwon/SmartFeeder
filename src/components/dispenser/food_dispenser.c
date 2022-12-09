@@ -8,6 +8,7 @@ hx711_t load_cell;
 void food_dispenser_init() {
     stepper_init();
     load_cell = FOOD_LC_init();
+    FOOD_LC_calibration(load_cell);
 }
 
 float get_food_level() {

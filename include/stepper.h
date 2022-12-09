@@ -25,5 +25,6 @@ void stepper_init();
 void step(int32_t num_steps, int32_t direction);
 void _one_step();
 void step_to(int32_t target);
+void stepper_test();
 
 #endif /* __STEPPER_H__ */

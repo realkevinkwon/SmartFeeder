@@ -12,5 +12,6 @@
 #define open_solenoid() gpio_set_level(SOLENOID_PIN, 0)
 
 void solenoid_init();
+void solenoid_test();
 
 #endif /* __SOLENOID_H__ */

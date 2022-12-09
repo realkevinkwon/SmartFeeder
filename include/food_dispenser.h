@@ -10,7 +10,8 @@
 #include "loadcell.h"
 
 #define FOOD_LC_init() LC1_init();
-#define FOOD_LC_to_grams(x) LC1_to_grams(x);
+#define FOOD_LC_calibration(load_cell) lc1_calibration(load_cell);
+#define FOOD_LC_to_grams(x) lc1_to_grams(x);
 
 // All weights are in grams
 #define FOOD_BOWL_EMPTY_WEIGHT 37.0
@@ -22,7 +23,7 @@
 #define FOOD_DISPENSER_CLOSED_ANGLE 0.0
 #define FOOD_DISPENSER_OPEN_ANGLE 90.0
 
-#define dispense_food(amount) fill_food_to_amount(FOOD_BOWL_FULL_WEIGHT - amount)
+#define dispense_food(amount) fill_food_to_amount(FOOD_BOWL_FULL_WEIGHT - amount);
 
 void food_dispenser_init();
 float get_food_level();
