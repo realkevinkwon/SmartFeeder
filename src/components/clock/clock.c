@@ -79,7 +79,7 @@ DateView new_date_view = {
 };
 
 void clock_init(void) {
-    set_timezone(TIMEZONE_DEFAULT);
+    // set_timezone(TIMEZONE_DEFAULT);
     set_time(&current_date);
 }
 
@@ -95,7 +95,7 @@ void set_time(Date* date) {
         .tm_hour = date->hour,
         .tm_mday = date->day,
         .tm_mon = date->month - 1,
-        .tm_year = date->year,
+        .tm_year = date->year - 1900,
     };
 
     tv.tv_sec = mktime(&time_info);
@@ -218,12 +218,12 @@ void update_minute_view(Date* date, DateView* date_view) {
     date_view->minute1 = temp_minute - 10 * date_view->minute0;
 }
 
-void update_current_date(void) {
+void update_time(void) {
     // get the new raw time (time_t) and translate to time_info (struct tm)
     time(&raw_time);
     localtime_r(&raw_time, &time_info);
 
-    current_date.year = time_info.tm_year;
+    current_date.year = time_info.tm_year + 1900;
     current_date.month = time_info.tm_mon + 1;
     current_date.day = time_info.tm_mday;
     current_date.hour = time_info.tm_hour;

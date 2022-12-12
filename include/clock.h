@@ -37,7 +37,7 @@ extern DateView new_date_view;
 
 void clock_init(void);
 void set_timezone(const char* new_timezone);
-void update_current_date(void);
+void update_time(void);
 void update_view(Date* date, DateView* date_view);
 void set_time(Date* date);
 

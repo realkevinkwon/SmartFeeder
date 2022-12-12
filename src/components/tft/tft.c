@@ -241,7 +241,7 @@
 
 /* date */
 #define DATE_MONTH_X 10
-#define DATE_DAY_X (DATE_MONTH_X + 45)
+#define DATE_DAY_X (DATE_MONTH_X + 55)
 #define DATE_YEAR_X (DATE_DAY_X + 35)
 #define DATE_Y CLOCK_Y
 /* ============== */
@@ -870,7 +870,7 @@ static void EVE_cmd_loadimages(void) {
 // }
 
 static void EVE_cmd_customclock_burst(void) {
-    update_current_date();
+    update_time();
     update_view(&current_date, &current_date_view);
 
     EVE_color_rgb_burst(WHITE);
