@@ -373,6 +373,8 @@ static void EVE_cmd_back_button_burst(uint8_t tag_value);
 static void EVE_cmd_keypad_burst(void);
 static void EVE_cmd_set_range_burst(void);
 static void EVE_cmd_set_date_burst(void);
+static void EVE_cmd_up_triangle_burst(uint16_t x, uint16_t y);
+static void EVE_cmd_down_triangle_burst(uint16_t x, uint16_t y);
 
 static void TFT_home(void);
 static void TFT_data(void);
@@ -1083,17 +1085,7 @@ static void EVE_cmd_set_date_burst(void) {
     EVE_cmd_text_burst(TIME_X6, TIME_TEXT_Y, FONT_PRIMARY, 0, new_date_view.suffix);
 }
 
-void EVE_cmd_down_triangle_burst(uint16_t x, uint16_t y) {
-    EVE_color_rgb_burst(WHITE);
-    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
-    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
-    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 6) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 12) * 16));
-    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
-}
-
-void EVE_cmd_up_triangle_burst(uint16_t x, uint16_t y) {
+static void EVE_cmd_up_triangle_burst(uint16_t x, uint16_t y) {
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
     EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
@@ -1101,6 +1093,16 @@ void EVE_cmd_up_triangle_burst(uint16_t x, uint16_t y) {
     EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 12) * 16));
     EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 6) * 16));
     EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 12) * 16));
+}
+
+static void EVE_cmd_down_triangle_burst(uint16_t x, uint16_t y) {
+    EVE_color_rgb_burst(WHITE);
+    EVE_cmd_dl_burst(LINE_WIDTH(2 * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_LINE_STRIP);
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 16) * 16, (y + 6) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 12) * 16, (y + 12) * 16));
+    EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
 }
 
 static void EVE_cmd_home_button_burst(uint8_t tag_value) {
