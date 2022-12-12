@@ -238,6 +238,12 @@
 #define CLOCK_X2 (CLOCK_X1 + 28)
 #define CLOCK_X3 (CLOCK_X2 + 30)
 #define CLOCK_Y 1
+
+/* date */
+#define DATE_MONTH_X 10
+#define DATE_DAY_X (DATE_MONTH_X + 45)
+#define DATE_YEAR_X (DATE_DAY_X + 35)
+#define DATE_Y CLOCK_Y
 /* ============== */
 
 /* number keys */
@@ -328,11 +334,11 @@ int16_t y_test[8] = {0, 10, 40, 35, 70, 11, 16, 28};
 static void touch_calibrate(void);
 
 static void EVE_cmd_loadimages(void);
-static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y);
+// static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y);
 
 static void EVE_cmd_statusbar_burst(void);
 static void EVE_cmd_customclock_burst(void);
-static void EVE_cmd_wifi_status_burst(void);
+// static void EVE_cmd_wifi_status_burst(void);
 
 static void increaseYear(Date* date);
 static void decreaseYear(Date* date);
@@ -347,9 +353,9 @@ static void increaseMinute(Date* date);
 static void decreaseMinute(Date* date);
 static void toggleSuffix(Date* date);
 
-static int16_t getMinValue(int16_t* arr, uint16_t num_points);
-static int16_t getMaxValue(int16_t* arr, uint16_t num_points);
-static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points);
+// static int16_t getMinValue(int16_t* arr, uint16_t num_points);
+// static int16_t getMaxValue(int16_t* arr, uint16_t num_points);
+// static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points);
 static void EVE_cmd_display_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points);
 static void EVE_cmd_demo_graph_burst(int16_t* x_data, int16_t* y_data, uint16_t num_points);
 
@@ -828,28 +834,26 @@ static void toggleSuffix(Date* date) {
     date->hour = temp_hour;
 }
 
-static int16_t getMinValue(int16_t* arr, uint16_t num_points) {
-   int16_t min_value = arr[0];
-    for (int i = 0; i < num_points; i++) {
-        min_value = arr[i] < min_value ? arr[i] : min_value;
-    }
-    return min_value;
-}
+// static int16_t getMinValue(int16_t* arr, uint16_t num_points) {
+//    int16_t min_value = arr[0];
+//     for (int i = 0; i < num_points; i++) {
+//         min_value = arr[i] < min_value ? arr[i] : min_value;
+//     }
+//     return min_value;
+// }
 
-static int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
-    int16_t max_value = arr[0];
-    for (int i = 1; i < num_points; i++) {
-        max_value = arr[i] > max_value ? arr[i] : max_value;
-    }
-    return max_value;
-}
+// static int16_t getMaxValue(int16_t* arr, uint16_t num_points) {
+//     int16_t max_value = arr[0];
+//     for (int i = 1; i < num_points; i++) {
+//         max_value = arr[i] > max_value ? arr[i] : max_value;
+//     }
+//     return max_value;
+// }
 
-static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
-    int16_t y_max = getMaxValue(y_data, num_points);
-    
-
-    return;
-}
+// static void scaleData(int16_t* x_data, int16_t* y_data, uint16_t num_points) {
+//     int16_t y_max = getMaxValue(y_data, num_points);
+//     return;
+// }
 /* ======================== */
 
 
@@ -858,17 +862,23 @@ static void EVE_cmd_loadimages(void) {
     EVE_cmd_loadimage(MEM_PIC_WIFI, EVE_OPT_NODL, pic_wifi_32, sizeof(pic_wifi_32));
 }
 
-static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
-    EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
-    EVE_cmd_setbitmap_burst(addr, fmt, width, height);
-    EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
-    EVE_cmd_dl_burst(DL_END);
-}
+// static void EVE_cmd_bitmap_burst(uint32_t addr, uint16_t fmt, uint16_t width, uint16_t height, uint16_t x, uint16_t y) {
+//     EVE_cmd_dl_burst(DL_BEGIN | EVE_BITMAPS);
+//     EVE_cmd_setbitmap_burst(addr, fmt, width, height);
+//     EVE_cmd_dl_burst(VERTEX2F(x * 16, y * 16));
+//     EVE_cmd_dl_burst(DL_END);
+// }
 
 static void EVE_cmd_customclock_burst(void) {
-    update_time();
+    update_current_date();
+    update_view(&current_date, &current_date_view);
 
     EVE_color_rgb_burst(WHITE);
+    EVE_cmd_fgcolor_burst(WHITE);
+    EVE_cmd_text_burst(DATE_MONTH_X, DATE_Y, FONT_TIME, 0, current_date_view.month);
+    EVE_cmd_text_burst(DATE_DAY_X, DATE_Y, FONT_TIME, 0, current_date_view.day);
+    EVE_cmd_text_burst(DATE_YEAR_X, DATE_Y, FONT_TIME, 0, current_date_view.year);
+
     EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_date_view.hour0);
     EVE_cmd_number_burst(CLOCK_X1 + DIGIT_WIDTH, CLOCK_Y, FONT_TIME, 0, current_date_view.hour1);
     EVE_cmd_text_burst(CLOCK_X2 - 5, CLOCK_Y - 1, FONT_TIME, 0, ":");
@@ -877,10 +887,10 @@ static void EVE_cmd_customclock_burst(void) {
     EVE_cmd_text_burst(CLOCK_X3, CLOCK_Y + 0, FONT_TIME, 0, current_date_view.suffix);
 }
 
-static void EVE_cmd_wifi_status_burst(void) {
-    EVE_color_rgb_burst(WHITE);
-    EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, WIFI_WIDTH, WIFI_HEIGHT, WIFI_X, WIFI_Y);
-}
+// static void EVE_cmd_wifi_status_burst(void) {
+//     EVE_color_rgb_burst(WHITE);
+//     EVE_cmd_bitmap_burst(MEM_PIC_WIFI, EVE_ARGB4, WIFI_WIDTH, WIFI_HEIGHT, WIFI_X, WIFI_Y);
+// }
 
 static void EVE_cmd_statusbar_burst(void) {
     // status bar background
