@@ -79,7 +79,7 @@ DateView new_date_view = {
 };
 
 void clock_init(void) {
-    // set_timezone(TIMEZONE_DEFAULT);
+    set_timezone(TIMEZONE_DEFAULT);
     set_time(&current_date);
 }
 

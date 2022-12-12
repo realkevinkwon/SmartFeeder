@@ -4,6 +4,12 @@
 #include <nvs.h>
 #include <nvs_flash.h>
 
+#define STORAGE_NAMESPACE "storage"
+#define SETTINGS_NAMESPACE "settings"       // general system settings
+#define SCHEDULE_NAMESPACE "schedule"       // saved feeding schedule
+#define WATER_NAMESPACE "water"             // water consumption data
+#define FOOD_NAMESPACE "food"               // food consumption data
+
 void memory_init(void);
 
 void mem_write(const char* namespace, uint32_t* new_data, size_t length);

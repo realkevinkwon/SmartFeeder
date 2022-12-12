@@ -17,7 +17,10 @@
 
 
 /* === macros for reading from and writing to internal memory === */
-#define LOAD_CELL_NAMESPACE "load_cell"
+#define SETTINGS_NAMESPACE "settings"       // general system settings
+#define SCHEDULE_NAMESPACE "schedule"       // saved feeding schedule
+#define WATER_NAMESPACE "water"             // water consumption data
+#define FOOD_NAMESPACE "food"               // food consumption data
 /* ============================================================== */
 
 
@@ -556,7 +559,7 @@ void TFT_touch(void) {
                         for (int i = 0; i < input_length; i++) {
                             int_input[i] = ASCII_TO_INT(input[i]);
                         }
-                        mem_write(LOAD_CELL_NAMESPACE, int_input, input_length);
+                        mem_write(SCHEDULE_NAMESPACE, int_input, input_length);
                         input_length = 0;
                         input[input_length] = '\0';
                     }
@@ -568,7 +571,7 @@ void TFT_touch(void) {
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
                     uint32_t* int_output;
-                    int_output = mem_read(LOAD_CELL_NAMESPACE, &output_length);
+                    int_output = mem_read(SCHEDULE_NAMESPACE, &output_length);
                     for (int i = 0; i < output_length; i++) {
                         output[i] = INT_TO_ASCII(int_output[i]);
                     }
