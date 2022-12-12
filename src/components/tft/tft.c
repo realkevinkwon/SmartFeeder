@@ -104,14 +104,18 @@
 #define TAG_FEED_BACKBUTTON (TAG_OFFSET_FEED + 0)
 
 #define TAG_FEED_DELETEBUTTON (TAG_OFFSET_FEED + 1)
-#define TAG_FEED_HOURUP (TAG_OFFSET_FEED + 2)
-#define TAG_FEED_HOURDOWN (TAG_OFFSET_FEED + 3)
-#define TAG_FEED_MINUTEUP (TAG_OFFSET_FEED + 4)
-#define TAG_FEED_MINUTEDOWN (TAG_OFFSET_FEED + 5)
-#define TAG_FEED_FOODUP (TAG_OFFSET_FEED + 6)
-#define TAG_FEED_FOODDOWN (TAG_OFFSET_FEED + 7)
-#define TAG_FEED_WATERUP (TAG_OFFSET_FEED + 8)
-#define TAG_FEED_WATERDOWN (TAG_OFFSET_FEED + 9)
+#define TAG_FEED_SAVEBUTTON (TAG_OFFSET_FEED + 2)
+
+#define TAG_FEED_HOURUP (TAG_OFFSET_FEED + 3)
+#define TAG_FEED_HOURDOWN (TAG_OFFSET_FEED + 4)
+#define TAG_FEED_MINUTEUP (TAG_OFFSET_FEED + 5)
+#define TAG_FEED_MINUTEDOWN (TAG_OFFSET_FEED + 6)
+#define TAG_FEED_SUFFIXUP (TAG_OFFSET_FEED + 7)
+#define TAG_FEED_SUFFIXDOWN (TAG_OFFSET_FEED + 8)
+#define TAG_FEED_FOODUP (TAG_OFFSET_FEED + 9)
+#define TAG_FEED_FOODDOWN (TAG_OFFSET_FEED + 10)
+#define TAG_FEED_WATERUP (TAG_OFFSET_FEED + 11)
+#define TAG_FEED_WATERDOWN (TAG_OFFSET_FEED + 12)
 
 /* settings screen */
 #define TAG_OFFSET_SETTINGS (4 * TAG_SIZE + 1)
@@ -165,6 +169,9 @@
 
 
 /* === dimensions and locations of on-screen elements === */
+#define ARROW_BUTTON_HEIGHT 20
+#define ARROW_BUTTON_WIDTH 24
+
 /* home screen buttons */
 #define HOME_BUTTON_WIDTH 200
 #define HOME_BUTTON_HEIGHT 40
@@ -183,16 +190,56 @@
 #define SCHEDULE_ADDBUTTON_X 260
 #define SCHEDULE_ADDBUTTON_Y 220
 
-#define SCHEDULE_VIEWBUTTON_WIDTH 200
+#define SCHEDULE_VIEWBUTTON_WIDTH 300
 #define SCHEDULE_VIEWBUTTON_HEIGHT 30
 #define SCHEDULE_VIEWBUTTON_X 20
 #define SCHEDULE_VIEWBUTTON_Y 35
 #define SCHEDULE_VIEWBUTTON_Y_OFFSET (SCHEDULE_VIEWBUTTON_HEIGHT + 5)
 
+/* feeding screen buttons */
+#define FEED_X 80
+#define FEED_Y 120
+#define FEED_HEIGHT 25
+
+#define FEED_TIME_WIDTH 120
+#define FEED_FOOD_WIDTH 28
+#define FEED_WATER_WIDTH 40
+
+#define FEED_HOUR_X FEED_X
+#define FEED_MINUTE_X (FEED_HOUR_X + 40)
+#define FEED_SUFFIX_X (FEED_MINUTE_X + 40)
+
+#define FEED_FOOD_X (FEED_SUFFIX_X + 110)
+#define FEED_WATER_X (FEED_FOOD_X + 110)
+
+
+#define FEED_BUTTON_HEIGHT ARROW_BUTTON_HEIGHT
+#define FEED_BUTTON_WIDTH ARROW_BUTTON_WIDTH
+
+#define FEED_BUTTON_X1 FEED_HOUR_X
+#define FEED_BUTTON_X2 FEED_MINUTE_X
+#define FEED_BUTTON_X3 FEED_SUFFIX_X
+
+#define FEED_BUTTON_X4 (FEED_FOOD_X + 1)
+#define FEED_BUTTON_X5 (FEED_WATER_X + 5)
+
+#define FEED_BUTTON_Y1 (FEED_Y - 32)
+#define FEED_BUTTON_Y2 (FEED_Y + 36)
+
+#define FEED_SAVEBUTTON_X 150
+#define FEED_SAVEBUTTON_Y 220
+#define FEED_DELETEBUTTON_X (FEED_SAVEBUTTON_X + FEED_SAVEBUTTON_WIDTH + 50)
+#define FEED_DELETEBUTTON_Y FEED_SAVEBUTTON_Y
+
+#define FEED_SAVEBUTTON_WIDTH 100
+#define FEED_SAVEBUTTON_HEIGHT 30
+#define FEED_DELETEBUTTON_WIDTH FEED_SAVEBUTTON_WIDTH
+#define FEED_DELETEBUTTON_HEIGHT FEED_SAVEBUTTON_HEIGHT
+
 /* data screen buttons */
 #define DATA_OFFSET 133
-#define DATA_DATE_BUTTON_HEIGHT 20
-#define DATA_DATE_BUTTON_WIDTH 24
+#define DATA_DATE_BUTTON_HEIGHT ARROW_BUTTON_HEIGHT
+#define DATA_DATE_BUTTON_WIDTH ARROW_BUTTON_WIDTH
 #define DATA_X1 START_DATE_X
 #define DATA_X2 (DATA_X1 + 35)
 #define DATA_X3 (DATA_X2 + 35)
@@ -213,8 +260,8 @@
 #define TIME_TEXT_Y 120
 #define TIME_TEXT_WIDTH 280
 #define TIME_TEXT_HEIGHT 25
-#define TIME_BUTTON_WIDTH DATA_DATE_BUTTON_WIDTH
-#define TIME_BUTTON_HEIGHT DATA_DATE_BUTTON_HEIGHT
+#define TIME_BUTTON_WIDTH ARROW_BUTTON_WIDTH 
+#define TIME_BUTTON_HEIGHT ARROW_BUTTON_HEIGHT 
 
 #define TIME_SETBUTTON_X 160
 #define TIME_SETBUTTON_Y 220
@@ -322,6 +369,7 @@ uint16_t toggle_state[255];                 // holds toggle states for various u
 uint8_t screen_state = SCREENSTATE_HOME;    // holds which screen should be displayed
 uint16_t lock_delay = 0;                    // delay for buttons
 uint8_t toggle_lock = 0;                    // allows only one touch target to be activated at a time
+uint8_t num_viewbuttons = 0;
 /* =========================== */
 
 
@@ -542,6 +590,36 @@ void TFT_touch(void) {
                     memcpy(datetime, &current_date, 5 * sizeof(uint32_t));
                     mem_erase(DATETIME_NAMESPACE);
                     mem_write(DATETIME_NAMESPACE, STORAGE_KEY, datetime, 5);
+                }
+                break;
+            case TAG_FEED_DELETEBUTTON:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_BUTTON;
+                }
+                break;
+            case TAG_FEED_SAVEBUTTON:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_BUTTON;
+                }
+                break;
+            case TAG_FEED_HOURUP:
+            case TAG_FEED_HOURDOWN:
+            case TAG_FEED_MINUTEUP:
+            case TAG_FEED_MINUTEDOWN:
+            case TAG_FEED_SUFFIXUP:
+            case TAG_FEED_SUFFIXDOWN:
+            case TAG_FEED_FOODUP:
+            case TAG_FEED_FOODDOWN:
+            case TAG_FEED_WATERUP:
+            case TAG_FEED_WATERDOWN:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_KEY;
                 }
                 break;
             case TAG_SCHEDULE_VIEWBUTTON1:
@@ -1068,6 +1146,38 @@ static void EVE_cmd_down_triangle_burst(uint16_t x, uint16_t y) {
     EVE_cmd_dl_burst(VERTEX2F((x + 8) * 16, (y + 6) * 16));
 }
 
+static void EVE_cmd_set_feed_burst(void) {
+    EVE_color_rgb_burst(COLOR_RGB(100,100,100));
+    EVE_cmd_text_burst(140, 50, FONT_PRIMARY, 0, "Set feeding time:");
+
+    EVE_color_rgb_burst(COLOR_RGB(230,230,230));
+    EVE_cmd_dl_burst(LINE_WIDTH(5 * 16));
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl_burst(VERTEX2F((FEED_X - 8) * 16, FEED_Y * 16));
+    EVE_cmd_dl_burst(VERTEX2F((FEED_X + FEED_TIME_WIDTH) * 16, (FEED_Y + FEED_HEIGHT) * 16));
+
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl_burst(VERTEX2F(FEED_FOOD_X * 16, FEED_Y * 16));
+    EVE_cmd_dl_burst(VERTEX2F((FEED_FOOD_X + FEED_FOOD_WIDTH) * 16, (FEED_Y + FEED_HEIGHT) * 16));
+
+    EVE_cmd_dl_burst(DL_BEGIN | EVE_RECTS);
+    EVE_cmd_dl_burst(VERTEX2F(FEED_WATER_X * 16, FEED_Y * 16));
+    EVE_cmd_dl_burst(VERTEX2F((FEED_WATER_X + FEED_WATER_WIDTH) * 16, (FEED_Y + FEED_HEIGHT) * 16));
+
+    EVE_color_rgb_burst(COLOR_RGB(80,80,80));
+    EVE_cmd_number_burst(FEED_HOUR_X, FEED_Y, FONT_PRIMARY, 0, 0);
+    EVE_cmd_number_burst(FEED_HOUR_X + 12, FEED_Y, FONT_PRIMARY, 0, 3);
+    EVE_cmd_text_burst(FEED_MINUTE_X - 10, FEED_Y - 2, FONT_PRIMARY, 0, ":");
+    EVE_cmd_number_burst(FEED_MINUTE_X, FEED_Y, FONT_PRIMARY, 0, 4);
+    EVE_cmd_number_burst(FEED_MINUTE_X + 12, FEED_Y, FONT_PRIMARY, 0, 2);
+    EVE_cmd_text_burst(FEED_SUFFIX_X, FEED_Y, FONT_PRIMARY, 0, "PM");
+
+    EVE_cmd_text_burst(FEED_FOOD_X - 10, FEED_Y + 5, FONT_DATE, EVE_OPT_RIGHTX, "FOOD");
+    EVE_cmd_number_burst(FEED_FOOD_X + FEED_FOOD_WIDTH - 3, FEED_Y, FONT_PRIMARY, EVE_OPT_RIGHTX, 50);
+    EVE_cmd_text_burst(FEED_WATER_X - 10, FEED_Y + 5, FONT_DATE, EVE_OPT_RIGHTX, "WATER");
+    EVE_cmd_number_burst(FEED_WATER_X + FEED_WATER_WIDTH - 3, FEED_Y, FONT_PRIMARY, EVE_OPT_RIGHTX, 150);
+}
+
 static void EVE_cmd_home_button_burst(uint8_t tag_value) {
     switch (tag_value) {
         case TAG_HOME_DATABUTTON:
@@ -1095,21 +1205,40 @@ static void EVE_cmd_home_button_burst(uint8_t tag_value) {
 }
 
 static void EVE_cmd_schedule_button_burst(uint8_t tag_value) {
-    uint16_t view_y = SCHEDULE_VIEWBUTTON_Y;
     switch (tag_value) {
-        case TAG_SCHEDULE_VIEWBUTTON5:
-            view_y += SCHEDULE_VIEWBUTTON_Y_OFFSET;
-        case TAG_SCHEDULE_VIEWBUTTON4:
-            view_y += SCHEDULE_VIEWBUTTON_Y_OFFSET;
-        case TAG_SCHEDULE_VIEWBUTTON3:
-            view_y += SCHEDULE_VIEWBUTTON_Y_OFFSET;
-        case TAG_SCHEDULE_VIEWBUTTON2:
-            view_y += SCHEDULE_VIEWBUTTON_Y_OFFSET;
         case TAG_SCHEDULE_VIEWBUTTON1:
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, view_y, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "feeding time stuff");
+            EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, SCHEDULE_VIEWBUTTON_Y, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "feeding time stuff");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_SCHEDULE_VIEWBUTTON2:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, SCHEDULE_VIEWBUTTON_Y + SCHEDULE_VIEWBUTTON_Y_OFFSET, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "feeding time stuff");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_SCHEDULE_VIEWBUTTON3:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, SCHEDULE_VIEWBUTTON_Y + 2 * SCHEDULE_VIEWBUTTON_Y_OFFSET, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "feeding time stuff");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_SCHEDULE_VIEWBUTTON4:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, SCHEDULE_VIEWBUTTON_Y + 3 * SCHEDULE_VIEWBUTTON_Y_OFFSET, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "feeding time stuff");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_SCHEDULE_VIEWBUTTON5:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, SCHEDULE_VIEWBUTTON_Y + 4 * SCHEDULE_VIEWBUTTON_Y_OFFSET, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "feeding time stuff");
             EVE_cmd_dl_burst(TAG(0));
             break;
         case TAG_SCHEDULE_ADDBUTTON:
@@ -1364,14 +1493,88 @@ static void EVE_cmd_time_button_burst(uint8_t tag_value) {
 static void EVE_cmd_feed_button_burst(uint8_t tag_value) {
     switch (tag_value) {
         case TAG_FEED_DELETEBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_DELETEBUTTON_X, FEED_DELETEBUTTON_Y, FEED_DELETEBUTTON_WIDTH, FEED_DELETEBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Delete");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
+        case TAG_FEED_SAVEBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_SAVEBUTTON_X, FEED_SAVEBUTTON_Y, FEED_SAVEBUTTON_WIDTH, FEED_SAVEBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Save");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
         case TAG_FEED_HOURUP:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X1, FEED_BUTTON_Y1, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_up_triangle_burst(FEED_BUTTON_X1, FEED_BUTTON_Y1);
+            EVE_cmd_dl_burst(TAG(0));
+            break;
         case TAG_FEED_HOURDOWN:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X1, FEED_BUTTON_Y2, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_down_triangle_burst(FEED_BUTTON_X1, FEED_BUTTON_Y2);
+            break;
         case TAG_FEED_MINUTEUP:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X2, FEED_BUTTON_Y1, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_up_triangle_burst(FEED_BUTTON_X2, FEED_BUTTON_Y1);
+            break;
         case TAG_FEED_MINUTEDOWN:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X2, FEED_BUTTON_Y2, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_down_triangle_burst(FEED_BUTTON_X2, FEED_BUTTON_Y2);
+            break;
+        case TAG_FEED_SUFFIXUP:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X3, FEED_BUTTON_Y1, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_up_triangle_burst(FEED_BUTTON_X3, FEED_BUTTON_Y1);
+            break;
+        case TAG_FEED_SUFFIXDOWN:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X3, FEED_BUTTON_Y2, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_down_triangle_burst(FEED_BUTTON_X3, FEED_BUTTON_Y2);
+            break;
         case TAG_FEED_FOODUP:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X4, FEED_BUTTON_Y1, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_up_triangle_burst(FEED_BUTTON_X4, FEED_BUTTON_Y1);
+            break;
         case TAG_FEED_FOODDOWN:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X4, FEED_BUTTON_Y2, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_down_triangle_burst(FEED_BUTTON_X4, FEED_BUTTON_Y2);
+            break;
         case TAG_FEED_WATERUP:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X5, FEED_BUTTON_Y1, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_up_triangle_burst(FEED_BUTTON_X5, FEED_BUTTON_Y1);
+            break;
         case TAG_FEED_WATERDOWN:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(FEED_BUTTON_X5, FEED_BUTTON_Y2, FEED_BUTTON_WIDTH, FEED_BUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], " ");
+            EVE_cmd_dl_burst(TAG(0));
+            EVE_cmd_down_triangle_burst(FEED_BUTTON_X5, FEED_BUTTON_Y2);
             break;
     }
 }
@@ -1522,10 +1725,16 @@ static void TFT_feed(void) {
                 screen_state = SCREENSTATE_SCHEDULE;
                 toggle_state[TAG_FEED_DELETEBUTTON] = 0;
             }
+            else if (toggle_state[TAG_FEED_SAVEBUTTON] != 0) {
+                screen_state = SCREENSTATE_SCHEDULE;
+                toggle_state[TAG_FEED_SAVEBUTTON] = 0;
+            }
             else if (toggle_state[TAG_FEED_HOURUP] != 0) { toggle_state[TAG_FEED_HOURUP] = 0; }
             else if (toggle_state[TAG_FEED_HOURDOWN] != 0) { toggle_state[TAG_FEED_HOURDOWN] = 0; }
             else if (toggle_state[TAG_FEED_MINUTEUP] != 0) { toggle_state[TAG_FEED_MINUTEUP] = 0; }
             else if (toggle_state[TAG_FEED_MINUTEDOWN] != 0) { toggle_state[TAG_FEED_MINUTEDOWN] = 0; }
+            else if (toggle_state[TAG_FEED_SUFFIXUP] != 0) { toggle_state[TAG_FEED_SUFFIXUP] = 0; }
+            else if (toggle_state[TAG_FEED_SUFFIXDOWN] != 0) { toggle_state[TAG_FEED_SUFFIXDOWN] = 0; }
             else if (toggle_state[TAG_FEED_FOODUP] != 0) { toggle_state[TAG_FEED_FOODUP] = 0; }
             else if (toggle_state[TAG_FEED_FOODDOWN] != 0) { toggle_state[TAG_FEED_FOODDOWN] = 0; }
             else if (toggle_state[TAG_FEED_WATERUP] != 0) { toggle_state[TAG_FEED_WATERUP] = 0; }
@@ -1536,12 +1745,17 @@ static void TFT_feed(void) {
         EVE_cmd_statusbar_burst();
         EVE_cmd_back_button_burst(TAG_FEED_BACKBUTTON);
 
+        EVE_cmd_set_feed_burst();
+
         EVE_cmd_feed_button_burst(TAG_FEED_DELETEBUTTON);
+        EVE_cmd_feed_button_burst(TAG_FEED_SAVEBUTTON);
 
         EVE_cmd_feed_button_burst(TAG_FEED_HOURUP);
         EVE_cmd_feed_button_burst(TAG_FEED_HOURDOWN);
         EVE_cmd_feed_button_burst(TAG_FEED_MINUTEUP);
         EVE_cmd_feed_button_burst(TAG_FEED_MINUTEDOWN);
+        EVE_cmd_feed_button_burst(TAG_FEED_SUFFIXUP);
+        EVE_cmd_feed_button_burst(TAG_FEED_SUFFIXDOWN);
         EVE_cmd_feed_button_burst(TAG_FEED_FOODUP);
         EVE_cmd_feed_button_burst(TAG_FEED_FOODDOWN);
         EVE_cmd_feed_button_burst(TAG_FEED_WATERUP);
@@ -1589,18 +1803,21 @@ static void TFT_schedule(void) {
                 screen_state = SCREENSTATE_FEED;
                 toggle_state[TAG_SCHEDULE_VIEWBUTTON5] = 0;
             }
-            else if (toggle_state[TAG_SCHEDULE_ADDBUTTON] != 0) { toggle_state[TAG_SCHEDULE_ADDBUTTON] = 0; }
+            else if (toggle_state[TAG_SCHEDULE_ADDBUTTON] != 0) { 
+                screen_state = SCREENSTATE_FEED;
+                toggle_state[TAG_SCHEDULE_ADDBUTTON] = 0;
+            }
             lock_delay = 0;
         }
 
         EVE_cmd_statusbar_burst();
         EVE_cmd_back_button_burst(TAG_SCHEDULE_BACKBUTTON);
 
-        EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON1);
-        EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON2);
-        EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON3);
-        EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON4);
-        EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON5);
+        if (num_viewbuttons > 0) { EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON1); }
+        if (num_viewbuttons > 1) { EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON2); }
+        if (num_viewbuttons > 2) { EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON3); }
+        if (num_viewbuttons > 3) { EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON4); }
+        if (num_viewbuttons > 4) { EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON5); }
 
         EVE_cmd_schedule_button_burst(TAG_SCHEDULE_ADDBUTTON);
 
