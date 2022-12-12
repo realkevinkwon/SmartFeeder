@@ -6,6 +6,7 @@
 
 #define STORAGE_NAMESPACE "storage"
 #define SETTINGS_NAMESPACE "settings"       // general system settings
+#define DATETIME_NAMESPACE "datetime"       // time and date
 #define SCHEDULE_NAMESPACE "schedule"       // saved feeding schedule
 #define WATER_NAMESPACE "water"             // water consumption data
 #define FOOD_NAMESPACE "food"               // food consumption data
