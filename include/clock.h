@@ -19,11 +19,11 @@ typedef struct _DateView {
 } DateView;
 
 typedef struct _Date {
-    uint16_t year;
-    uint16_t month;
-    uint16_t day;
-    uint16_t hour;
-    uint16_t minute;
+    uint32_t year;
+    uint32_t month;
+    uint32_t day;
+    uint32_t hour;
+    uint32_t minute;
 } Date;
 
 extern Date current_date;
