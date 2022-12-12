@@ -9,7 +9,7 @@
 #include "driver/gpio.h"
 #include "hx711.h"
 
-#define LC_NUM_MEASUREMENTS 8
+#define LC_NUM_MEASUREMENTS 16
 #define LC_NUM_ATTEMPTS 8
 
 #define LC1_DOUT GPIO_NUM_18
@@ -31,6 +31,7 @@ void lc1_calibration(hx711_t load_cell);
 float lc1_to_grams(int32_t raw);
 void lc2_calibration(hx711_t load_cell);
 float lc2_to_grams(int32_t raw);
-void load_cell_test ();
+void load_cell_test();
+void load_cell_dump();
 
 #endif /* __LOADCELL_H__ */
