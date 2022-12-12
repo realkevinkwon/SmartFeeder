@@ -21,6 +21,9 @@ void run_display(void* pvParameters) {
     uint32_t current_millis;
     uint32_t previous_millis = 0;
     uint8_t display_delay = 0;
+    uint32_t current_hour = 0;
+    uint32_t current_minute = 0;
+    uint32_t previous_minute = INT32_MAX;
     uint32_t micros_start, micros_end;
 
     while (1) {
@@ -43,6 +46,31 @@ void run_display(void* pvParameters) {
                 TFT_display();
                 micros_end = (uint32_t) (esp_timer_get_time());
                 num_profile_a = (micros_end - micros_start); /* calculate the micro-seconds passed during the call to TFT_display */
+            }
+
+            current_hour = current_date.hour;
+            current_minute = current_date.minute;
+            if (previous_minute != current_minute) {
+                if (schedule.feed_toggle[0] && current_hour == schedule.feeding_times[0].hour && current_minute == schedule.feeding_times[0].minute) {
+                    previous_minute = current_minute;
+                    printf("Feeding time 1: time to eat!\n");
+                }
+                else if (schedule.feed_toggle[1] && current_hour == schedule.feeding_times[1].hour && current_minute == schedule.feeding_times[1].minute) {
+                    previous_minute = current_minute;
+                    printf("Feeding time 2: time to eat!\n");
+                }
+                else if (schedule.feed_toggle[2] && current_hour == schedule.feeding_times[2].hour && current_minute == schedule.feeding_times[2].minute) {
+                    previous_minute = current_minute;
+                    printf("Feeding time 3: time to eat!\n");
+                }
+                else if (schedule.feed_toggle[3] && current_hour == schedule.feeding_times[3].hour && current_minute == schedule.feeding_times[3].minute) {
+                    previous_minute = current_minute;
+                    printf("Feeding time 4: time to eat!\n");
+                }
+                else if (schedule.feed_toggle[4] && current_hour == schedule.feeding_times[4].hour && current_minute == schedule.feeding_times[4].minute) {
+                    previous_minute = current_minute;
+                    printf("Feeding time 5: time to eat!\n");
+                }
             }
         }
 

@@ -43,6 +43,7 @@ typedef struct _FeedingTime {
 
 typedef struct _Schedule {
     FeedingTime feeding_times[5];
+    uint32_t feed_toggle[5];
 } Schedule;
 
 extern Schedule schedule;
@@ -60,6 +61,7 @@ extern DateView new_date_view;
 extern DateView feed_date_view;
 extern uint8_t feed_select;
 extern uint8_t feed_toggle[5];
+extern uint16_t toggle_state[255];
 
 void select_feeding_time(FeedingTime* feeding_time, DateView* feed_date_view);
 void memory_init(void);

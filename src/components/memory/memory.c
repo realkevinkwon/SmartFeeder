@@ -1,10 +1,16 @@
 #include "memory.h"
 
+#define TAG_SCHEDULE_TOGGLE1 67
+#define TAG_SCHEDULE_TOGGLE2 68
+#define TAG_SCHEDULE_TOGGLE3 69
+#define TAG_SCHEDULE_TOGGLE4 70
+#define TAG_SCHEDULE_TOGGLE5 71
+
 Schedule schedule;
 uint32_t food_amount = 10;
 uint32_t water_amount = 10;
 uint8_t feed_select = -1;
-uint8_t feed_toggle[5] = {0, 0, 0, 0, 0};
+uint16_t toggle_state[255];                 // holds toggle states for various ui elements
 
 Date current_date = {
     .year = 2022,
@@ -113,6 +119,7 @@ void memory_init(void) {
         schedule.feeding_times[i].minute = 0;
         schedule.feeding_times[i].food_amount = 10;
         schedule.feeding_times[i].water_amount = 10;
+        schedule.feed_toggle[i] = 0;
     }
 
     size_t length;
@@ -122,6 +129,12 @@ void memory_init(void) {
         memcpy(&schedule, data, length * sizeof(uint32_t));
     }
     if (data != NULL) { free(data); }
+
+    toggle_state[TAG_SCHEDULE_TOGGLE1] = schedule.feed_toggle[0] == 1 ? 65535 : 0;
+    toggle_state[TAG_SCHEDULE_TOGGLE2] = schedule.feed_toggle[1] == 1 ? 65535 : 0;
+    toggle_state[TAG_SCHEDULE_TOGGLE3] = schedule.feed_toggle[2] == 1 ? 65535 : 0;
+    toggle_state[TAG_SCHEDULE_TOGGLE4] = schedule.feed_toggle[3] == 1 ? 65535 : 0;
+    toggle_state[TAG_SCHEDULE_TOGGLE5] = schedule.feed_toggle[4] == 1 ? 65535 : 0;
 }
 
 void mem_write(const char* namespace, const char* key, uint32_t* new_data, size_t length) {

@@ -103,6 +103,7 @@
 #define TAG_SCHEDULE_TOGGLE3 (TAG_OFFSET_SCHEDULE + 8)
 #define TAG_SCHEDULE_TOGGLE4 (TAG_OFFSET_SCHEDULE + 9)
 #define TAG_SCHEDULE_TOGGLE5 (TAG_OFFSET_SCHEDULE + 10)
+#define TAG_SCHEDULE_SAVEBUTTON (TAG_OFFSET_SCHEDULE + 11)
 
 /* feeding time screen */
 #define TAG_OFFSET_FEED (3 * TAG_SIZE + 1)
@@ -200,6 +201,11 @@
 #define SCHEDULE_VIEWBUTTON_Y 35
 #define SCHEDULE_VIEWBUTTON_Y_OFFSET (SCHEDULE_VIEWBUTTON_HEIGHT + 5)
 
+#define SCHEDULE_SAVEBUTTON_X 200
+#define SCHEDULE_SAVEBUTTON_Y 220
+#define SCHEDULE_SAVEBUTTON_WIDTH 100
+#define SCHEDULE_SAVEBUTTON_HEIGHT 30
+
 /* feeding screen buttons */
 #define FEED_X 80
 #define FEED_Y 120
@@ -230,7 +236,7 @@
 #define FEED_BUTTON_Y1 (FEED_Y - 32)
 #define FEED_BUTTON_Y2 (FEED_Y + 36)
 
-#define FEED_SAVEBUTTON_X 140
+#define FEED_SAVEBUTTON_X 200
 #define FEED_SAVEBUTTON_Y 220
 #define FEED_DELETEBUTTON_X (FEED_SAVEBUTTON_X + FEED_SAVEBUTTON_WIDTH + 50)
 #define FEED_DELETEBUTTON_Y FEED_SAVEBUTTON_Y
@@ -369,7 +375,6 @@ size_t output_length = 0;
 
 
 /* === variables for touch === */
-uint16_t toggle_state[255];                 // holds toggle states for various ui elements
 uint8_t screen_state = SCREENSTATE_HOME;    // holds which screen should be displayed
 uint16_t lock_delay = 0;                    // delay for buttons
 uint8_t toggle_lock = 0;                    // allows only one touch target to be activated at a time
@@ -603,10 +608,10 @@ void TFT_touch(void) {
                     schedule.feeding_times[feed_select].minute = feed_date.minute;
                     schedule.feeding_times[feed_select].food_amount = food_amount;
                     schedule.feeding_times[feed_select].water_amount = water_amount;
-                    uint32_t schedule_data[20];
-                    memcpy(schedule_data, &schedule, 20 * sizeof(uint32_t));
+                    uint32_t schedule_data[25];
+                    memcpy(schedule_data, &schedule, 25 * sizeof(uint32_t));
                     mem_erase(SCHEDULE_NAMESPACE);
-                    mem_write(SCHEDULE_NAMESPACE, STORAGE_KEY, schedule_data, 20);
+                    mem_write(SCHEDULE_NAMESPACE, STORAGE_KEY, schedule_data, 25);
                 }
                 break;
             case TAG_FEED_HOUR_UP:
@@ -738,14 +743,49 @@ void TFT_touch(void) {
                 }
                 break;
             case TAG_SCHEDULE_TOGGLE1:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = toggle_state[tag] == 0 ? 65535 : 0;
+                    schedule.feed_toggle[0] = schedule.feed_toggle[feed_select] == 1 ? 0 : 1;
+                }
+                break;
             case TAG_SCHEDULE_TOGGLE2:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = toggle_state[tag] == 0 ? 65535 : 0;
+                    schedule.feed_toggle[1] = schedule.feed_toggle[feed_select] == 1 ? 0 : 1;
+                }
+                break;
             case TAG_SCHEDULE_TOGGLE3:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = toggle_state[tag] == 0 ? 65535 : 0;
+                    schedule.feed_toggle[2] = schedule.feed_toggle[feed_select] == 1 ? 0 : 1;
+                }
+                break;
             case TAG_SCHEDULE_TOGGLE4:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = toggle_state[tag] == 0 ? 65535 : 0;
+                    schedule.feed_toggle[3] = schedule.feed_toggle[feed_select] == 1 ? 0 : 1;
+                }
+                break;
             case TAG_SCHEDULE_TOGGLE5:
                 if (0 == toggle_lock) {
                     toggle_lock = tag;
                     toggle_state[tag] = toggle_state[tag] == 0 ? 65535 : 0;
-                    feed_toggle[feed_select] = feed_toggle[feed_select] == 1 ? 0 : 1;
+                    schedule.feed_toggle[4] = schedule.feed_toggle[feed_select] == 1 ? 0 : 1;
+                }
+                break;
+            case TAG_SCHEDULE_SAVEBUTTON:
+                if (0 == toggle_lock) {
+                    toggle_lock = tag;
+                    toggle_state[tag] = EVE_OPT_FLAT;
+                    lock_delay = DELAY_BUTTON;
+                    uint32_t schedule_data[25];
+                    memcpy(schedule_data, &schedule, 25 * sizeof(uint32_t));
+                    mem_erase(SCHEDULE_NAMESPACE);
+                    mem_write(SCHEDULE_NAMESPACE, STORAGE_KEY, schedule_data, 25);
                 }
                 break;
             case TAG_SETTINGS_ERASEBUTTON:
@@ -1396,6 +1436,13 @@ static void EVE_cmd_schedule_button_burst(uint8_t tag_value) {
             EVE_cmd_button_burst(SCHEDULE_VIEWBUTTON_X, SCHEDULE_VIEWBUTTON_Y + 4 * SCHEDULE_VIEWBUTTON_Y_OFFSET, SCHEDULE_VIEWBUTTON_WIDTH, SCHEDULE_VIEWBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Feeding time 5");
             EVE_cmd_dl_burst(TAG(0));
             break;
+        case TAG_SCHEDULE_SAVEBUTTON:
+            EVE_cmd_fgcolor_burst(BABY_BLUE);
+            EVE_color_rgb_burst(WHITE);
+            EVE_cmd_dl_burst(TAG(tag_value));
+            EVE_cmd_button_burst(SCHEDULE_SAVEBUTTON_X, SCHEDULE_SAVEBUTTON_Y, SCHEDULE_SAVEBUTTON_WIDTH, SCHEDULE_SAVEBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Save");
+            EVE_cmd_dl_burst(TAG(0));
+            break;
     }
 }
 
@@ -1920,6 +1967,10 @@ static void TFT_schedule(void) {
                 screen_state = SCREENSTATE_HOME;
                 toggle_state[TAG_SCHEDULE_BACKBUTTON] = 0;
             }
+            else if (toggle_state[TAG_SCHEDULE_SAVEBUTTON] != 0) {
+                screen_state = SCREENSTATE_HOME;
+                toggle_state[TAG_SCHEDULE_SAVEBUTTON] = 0;
+            }
             else if (toggle_state[TAG_SCHEDULE_VIEWBUTTON1] != 0) {
                 screen_state = SCREENSTATE_FEED;
                 toggle_state[TAG_SCHEDULE_VIEWBUTTON1] = 0;
@@ -1945,6 +1996,7 @@ static void TFT_schedule(void) {
 
         EVE_cmd_statusbar_burst();
         EVE_cmd_back_button_burst(TAG_SCHEDULE_BACKBUTTON);
+        EVE_cmd_schedule_button_burst(TAG_SCHEDULE_SAVEBUTTON);
 
         EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON1);
         EVE_cmd_schedule_button_burst(TAG_SCHEDULE_VIEWBUTTON2);
