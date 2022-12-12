@@ -181,8 +181,13 @@
 #define SCHEDULE_VIEWBUTTON_WIDTH 200
 #define SCHEDULE_VIEWBUTTON_HEIGHT 30
 #define SCHEDULE_VIEWBUTTON_X 20
-#define SCHEDULE_VIEWBUTTON_Y 40
+#define SCHEDULE_VIEWBUTTON_Y 35
 #define SCHEDULE_VIEWBUTTON_Y_OFFSET (SCHEDULE_VIEWBUTTON_HEIGHT + 5)
+
+#define SCHEDULE_ADDBUTTON_WIDTH 200
+#define SCHEDULE_ADDBUTTON_HEIGHT 30
+#define SCHEDULE_ADDBUTTON_X 260
+#define SCHEDULE_ADDBUTTON_Y 220
 
 /* data screen buttons */
 #define DATA_OFFSET 133
@@ -1111,7 +1116,7 @@ static void EVE_cmd_schedule_button_burst(uint8_t tag_value) {
             EVE_cmd_fgcolor_burst(BABY_BLUE);
             EVE_color_rgb_burst(WHITE);
             EVE_cmd_dl_burst(TAG(tag_value));
-            EVE_cmd_button_burst(120, 220, 200, 30, FONT_PRIMARY, toggle_state[tag_value], "Add feeding time");
+            EVE_cmd_button_burst(SCHEDULE_ADDBUTTON_X, SCHEDULE_ADDBUTTON_Y, SCHEDULE_ADDBUTTON_WIDTH, SCHEDULE_ADDBUTTON_HEIGHT, FONT_PRIMARY, toggle_state[tag_value], "Add feeding time");
             EVE_cmd_dl_burst(TAG(0));
             break;
     }
