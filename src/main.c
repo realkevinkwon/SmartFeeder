@@ -58,9 +58,6 @@ void app_main() {
     solenoid_init();
     printf("Done\n");
 
-    gpio_reset_pin(GPIO_NUM_26);
-    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_INPUT);
-
     // initialize LCD as SPI device
     printf("Running EVE_init_spi() ... \n");
     EVE_init_spi();

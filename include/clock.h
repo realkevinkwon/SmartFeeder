@@ -9,35 +9,6 @@
 #include <sys/time.h>
 #include "memory.h"
 
-typedef struct _DateView {
-    char year[5];
-    char month[4];
-    char day[3];
-    uint8_t hour0;
-    uint8_t hour1;
-    uint8_t minute0;
-    uint8_t minute1;
-    char suffix[3];
-} DateView;
-
-typedef struct _Date {
-    uint32_t year;
-    uint32_t month;
-    uint32_t day;
-    uint32_t hour;
-    uint32_t minute;
-} Date;
-
-extern Date current_date;
-extern Date start_date;
-extern Date end_date;
-extern Date new_date;
-extern Date feed_date;
-extern DateView current_date_view;
-extern DateView start_date_view;
-extern DateView end_date_view;
-extern DateView new_date_view;
-extern DateView feed_date_view;
 
 void clock_init(void);
 void set_timezone(const char* new_timezone);

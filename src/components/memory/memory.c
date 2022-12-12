@@ -1,7 +1,104 @@
 #include "memory.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "inttypes.h"
+
+Schedule schedule;
+uint32_t food_amount = 10;
+uint32_t water_amount = 10;
+uint8_t feed_select = -1;
+uint8_t feed_toggle[5] = {0, 0, 0, 0, 0};
+
+Date current_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date start_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date end_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date new_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date feed_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+
+DateView current_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView start_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView end_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView new_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView feed_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+
+void select_feeding_time(FeedingTime* feeding_time, DateView* feed_date_view) {
+    feed_date.hour = feeding_time->hour;
+    feed_date.minute = feeding_time->minute;
+    food_amount = feeding_time->food_amount;
+    water_amount = feeding_time->water_amount;
+}
 
 void memory_init(void) {
     esp_err_t err = nvs_flash_init();
@@ -10,6 +107,21 @@ void memory_init(void) {
         err = nvs_flash_init();
     }
     ESP_ERROR_CHECK(err);
+
+    for (int i = 0; i < 5; i++) {
+        schedule.feeding_times[i].hour = 0;
+        schedule.feeding_times[i].minute = 0;
+        schedule.feeding_times[i].food_amount = 10;
+        schedule.feeding_times[i].water_amount = 10;
+    }
+
+    size_t length;
+    uint32_t* data;
+    data = mem_read(SCHEDULE_NAMESPACE, STORAGE_KEY, &length);
+    if (length > 0) {
+        memcpy(&schedule, data, length * sizeof(uint32_t));
+    }
+    if (data != NULL) { free(data); }
 }
 
 void mem_write(const char* namespace, const char* key, uint32_t* new_data, size_t length) {
