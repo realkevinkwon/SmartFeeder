@@ -4,8 +4,10 @@
 #pragma once
 
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include "memory.h"
 
 typedef struct _DateView {
     char year[5];

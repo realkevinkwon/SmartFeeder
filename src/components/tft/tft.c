@@ -516,7 +516,11 @@ void TFT_touch(void) {
                     toggle_lock = tag;
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_BUTTON;
-                    set_time(&new_date);
+                    set_time(&new_date);    // set system time
+                    update_time();          // update current_date
+                    uint32_t datetime[5];
+                    memcpy(datetime, &current_date, 5 * sizeof(uint32_t));
+                    mem_write(DATETIME_NAMESPACE, datetime, 5);
                 }
                 break;
             case TAG_SCHEDULE_KEY_0:
