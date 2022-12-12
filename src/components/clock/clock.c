@@ -1,16 +1,81 @@
 #include "clock.h"
+#include <stdio.h>
 
 #define TIMEZONE_DEFAULT "EST5EDT,M3.2.0,M11.1.0"
+#define INT_TO_ASCII(x) (x + 48)
 
 time_t raw_time;
 struct timeval tv = { .tv_sec = 100000, .tv_usec = 0 };
 struct tm time_info;
-Time current_time = {
-    .hour0 = 0,
-    .hour1 = 0,
+
+Date current_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date start_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date end_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+Date new_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
+
+DateView current_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
     .minute0 = 0,
     .minute1 = 0,
-    .suffix = {'A','M','\0'}
+    .suffix = {'A','M','\0'},
+};
+DateView start_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView end_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView new_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
 };
 
 void clock_init(void) {
@@ -22,21 +87,14 @@ void set_timezone(const char* timezone) {
     tzset();
 }
 
-void set_time(uint16_t year, uint16_t month, uint16_t day, uint16_t hour, uint16_t minute, char* suffix) {
-    if (hour == 12 && suffix[0] == 'A') {
-        hour = 0;
-    }
-    else if (suffix[0] == 'P') {
-        hour += 12;
-    }
-
+void set_time(Date* new_date) {
     time_info = (struct tm) {
         .tm_sec = 0,
-        .tm_min = minute,
-        .tm_hour = hour,
-        .tm_mday = day,
-        .tm_mon = month - 1,
-        .tm_year = year,
+        .tm_min = new_date->minute,
+        .tm_hour = new_date->hour,
+        .tm_mday = new_date->day,
+        .tm_mon = new_date->month - 1,
+        .tm_year = new_date->year,
     };
 
     tv.tv_sec = mktime(&time_info);
@@ -44,92 +102,119 @@ void set_time(uint16_t year, uint16_t month, uint16_t day, uint16_t hour, uint16
     settimeofday(&tv, NULL);
 }
 
-void update_month_str(char* month_str, uint16_t month) {
-    switch (month) {
+void update_year_view(Date* date, DateView* date_view) {
+    uint16_t temp_year = date->year;
+    uint16_t year_digit = temp_year / 1000;
+    date_view->year[0] = INT_TO_ASCII(year_digit);
+    temp_year -= year_digit * 1000;
+
+    year_digit = temp_year / 100;
+    date_view->year[1] = INT_TO_ASCII(year_digit);
+    temp_year -= year_digit * 100;
+
+    year_digit = temp_year / 10;
+    date_view->year[2] = INT_TO_ASCII(year_digit);
+    date_view->year[3] = INT_TO_ASCII(temp_year - year_digit * 10);
+    date_view->year[4] = '\0';
+}
+
+void update_month_view(Date* date, DateView* date_view) {
+    switch (date->month) {
         case 1:
-            month_str[0] = 'J';
-            month_str[1] = 'A';
-            month_str[2] = 'N';
+            date_view->month[0] = 'J';
+            date_view->month[1] = 'A';
+            date_view->month[2] = 'N';
             break;
         case 2:
-            month_str[0] = 'F';
-            month_str[1] = 'E';
-            month_str[2] = 'B';
+            date_view->month[0] = 'F';
+            date_view->month[1] = 'E';
+            date_view->month[2] = 'B';
             break;
         case 3:
-            month_str[0] = 'M';
-            month_str[1] = 'A';
-            month_str[2] = 'R';
+            date_view->month[0] = 'M';
+            date_view->month[1] = 'A';
+            date_view->month[2] = 'R';
             break;
         case 4:
-            month_str[0] = 'A';
-            month_str[1] = 'P';
-            month_str[2] = 'R';
+            date_view->month[0] = 'A';
+            date_view->month[1] = 'P';
+            date_view->month[2] = 'R';
             break;
         case 5:
-            month_str[0] = 'M';
-            month_str[1] = 'A';
-            month_str[2] = 'Y';
+            date_view->month[0] = 'M';
+            date_view->month[1] = 'A';
+            date_view->month[2] = 'Y';
             break;
         case 6:
-            month_str[0] = 'J';
-            month_str[1] = 'U';
-            month_str[2] = 'N';
+            date_view->month[0] = 'J';
+            date_view->month[1] = 'U';
+            date_view->month[2] = 'N';
             break;
         case 7:
-            month_str[0] = 'J';
-            month_str[1] = 'U';
-            month_str[2] = 'L';
+            date_view->month[0] = 'J';
+            date_view->month[1] = 'U';
+            date_view->month[2] = 'L';
             break;
         case 8:
-            month_str[0] = 'A';
-            month_str[1] = 'U';
-            month_str[2] = 'G';
+            date_view->month[0] = 'A';
+            date_view->month[1] = 'U';
+            date_view->month[2] = 'G';
             break;
         case 9:
-            month_str[0] = 'S';
-            month_str[1] = 'E';
-            month_str[2] = 'P';
+            date_view->month[0] = 'S';
+            date_view->month[1] = 'E';
+            date_view->month[2] = 'P';
             break;
         case 10:
-            month_str[0] = 'O';
-            month_str[1] = 'C';
-            month_str[2] = 'T';
+            date_view->month[0] = 'O';
+            date_view->month[1] = 'C';
+            date_view->month[2] = 'T';
             break;
         case 11:
-            month_str[0] = 'N';
-            month_str[1] = 'O';
-            month_str[2] = 'V';
+            date_view->month[0] = 'N';
+            date_view->month[1] = 'O';
+            date_view->month[2] = 'V';
             break;
         case 12:
-            month_str[0] = 'D';
-            month_str[1] = 'E';
-            month_str[2] = 'C';
+            date_view->month[0] = 'D';
+            date_view->month[1] = 'E';
+            date_view->month[2] = 'C';
             break;
     }
-    month_str[3] = '\0';
+    date_view->month[3] = '\0';
 }
 
-void update_day_str(char* day_str, uint16_t day) {
-    uint8_t temp_day = day / 10;
-    day_str[0] = temp_day;
-    day_str[1] = day - temp_day * 10;
-    day_str[2] = '\0';
+void update_day_view(Date* date, DateView* date_view) {
+    uint16_t day_digit = date->day / 10;
+    date_view->day[0] = INT_TO_ASCII(day_digit);
+    date_view->day[1] = INT_TO_ASCII(date->day - day_digit * 10);
+    date_view->day[2] = '\0';
 }
 
-void update_year_str(char* year_str, uint16_t year) {
-    uint8_t temp_year = year / 1000;
-    year_str[0] = temp_year;
-    year -= temp_year * 1000;
+void update_hour_view(Date* date, DateView* date_view) {
+    uint16_t temp_hour = date->hour;
+    if (temp_hour >= 0 && temp_hour < 12) {
+        if (temp_hour == 0) {
+            temp_hour = 12;
+        }
+        date_view->suffix[0] = 'A';
+    }
+    else {
+        if (temp_hour != 12) {
+            temp_hour -= 12;
+        }
+        date_view->suffix[0] = 'P';
+    }
+    date_view->hour0 = temp_hour / 10;
+    date_view->hour1 = temp_hour - 10 * date_view->hour0;
+    date_view->suffix[1] = 'M';
+    date_view->suffix[2] = '\0';
+}
 
-    temp_year = year / 100;
-    year_str[1] = temp_year;
-    year -= temp_year * 100;
-
-    temp_year = year / 10;
-    year_str[2] = temp_year;
-    year_str[3] = year - temp_year * 10;
-    year_str[4] = '\0';
+void update_minute_view(Date* date, DateView* date_view) {
+    uint16_t temp_minute = date->minute;
+    date_view->minute0 = temp_minute / 10;
+    date_view->minute1 = temp_minute - 10 * date_view->minute0;
 }
 
 void update_time(void) {
@@ -137,25 +222,15 @@ void update_time(void) {
     time(&raw_time);
     localtime_r(&raw_time, &time_info);
 
-    uint8_t temp_hour = time_info.tm_hour;
-    uint8_t temp_minute = time_info.tm_min;
+    current_date.year = time_info.tm_year;
+    current_date.month = time_info.tm_mon + 1;
+    current_date.day = time_info.tm_mday;
+    current_date.hour = time_info.tm_hour;
+    current_date.minute = time_info.tm_min;
 
-    // translate 24-hour time to 12-hour time
-    if (temp_hour >= 0 && temp_hour <= 12) {
-        if (temp_hour == 0) {
-            temp_hour = 12;
-        }
-        current_time.suffix[0] = 'A';
-    }
-    else {
-        temp_hour -= 12;
-        current_time.suffix[0] = 'P';
-    }
-
-    current_time.hour0 = temp_hour / 10;
-    current_time.hour1 = temp_hour - 10 * current_time.hour0;
-    current_time.minute0 = temp_minute / 10;
-	current_time.minute1 = temp_minute - 10 * current_time.minute0;
-    current_time.suffix[1] = 'M';
-    current_time.suffix[2] = '\0';
+    update_year_view(&current_date, &current_date_view);
+    update_month_view(&current_date, &current_date_view);
+    update_day_view(&current_date, &current_date_view);
+    update_hour_view(&current_date, &current_date_view);
+    update_minute_view(&current_date, &current_date_view);
 }
