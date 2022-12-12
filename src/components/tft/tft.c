@@ -520,7 +520,8 @@ void TFT_touch(void) {
                     update_time();          // update current_date
                     uint32_t datetime[5];
                     memcpy(datetime, &current_date, 5 * sizeof(uint32_t));
-                    mem_write(DATETIME_NAMESPACE, datetime, 5);
+                    mem_erase(DATETIME_NAMESPACE);
+                    mem_write(DATETIME_NAMESPACE, STORAGE_KEY, datetime, 5);
                 }
                 break;
             case TAG_SCHEDULE_KEY_0:
@@ -563,7 +564,7 @@ void TFT_touch(void) {
                         for (int i = 0; i < input_length; i++) {
                             int_input[i] = ASCII_TO_INT(input[i]);
                         }
-                        mem_write(SCHEDULE_NAMESPACE, int_input, input_length);
+                        mem_write(SCHEDULE_NAMESPACE, STORAGE_KEY, int_input, input_length);
                         input_length = 0;
                         input[input_length] = '\0';
                     }
@@ -575,7 +576,7 @@ void TFT_touch(void) {
                     toggle_state[tag] = EVE_OPT_FLAT;
                     lock_delay = DELAY_KEY;
                     uint32_t* int_output;
-                    int_output = mem_read(SCHEDULE_NAMESPACE, &output_length);
+                    int_output = mem_read(SCHEDULE_NAMESPACE, STORAGE_KEY, &output_length);
                     for (int i = 0; i < output_length; i++) {
                         output[i] = INT_TO_ASCII(int_output[i]);
                     }
@@ -590,7 +591,7 @@ void TFT_touch(void) {
                     lock_delay = DELAY_KEY;
                     output_length = 0;
                     output[output_length] = '\0';
-                    mem_erase();
+                    mem_erase(SCHEDULE_NAMESPACE);
                 }
                 break;
             case TAG_DATA_START_MONTH_UP:

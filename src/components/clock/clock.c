@@ -81,7 +81,7 @@ DateView new_date_view = {
 void clock_init(void) {
     size_t length;
     uint32_t* datetime;
-    datetime = mem_read(DATETIME_NAMESPACE, &length);
+    datetime = mem_read(DATETIME_NAMESPACE, STORAGE_KEY, &length);
     if (length == 5) {
         memcpy(&current_date, datetime, 5 * sizeof(uint32_t));
     }
