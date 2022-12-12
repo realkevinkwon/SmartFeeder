@@ -244,7 +244,7 @@
 
 /* date */
 #define DATE_MONTH_X 10
-#define DATE_DAY_X (DATE_MONTH_X + 55)
+#define DATE_DAY_X (DATE_MONTH_X + 50)
 #define DATE_YEAR_X (DATE_DAY_X + 35)
 #define DATE_Y CLOCK_Y
 /* ============== */
@@ -893,7 +893,9 @@ static void EVE_cmd_customclock_burst(void) {
     EVE_color_rgb_burst(WHITE);
     EVE_cmd_fgcolor_burst(WHITE);
     EVE_cmd_text_burst(DATE_MONTH_X, DATE_Y, FONT_TIME, 0, current_date_view.month);
+    EVE_cmd_text_burst(DATE_DAY_X - 10, DATE_Y, FONT_TIME, 0, "-");
     EVE_cmd_text_burst(DATE_DAY_X, DATE_Y, FONT_TIME, 0, current_date_view.day);
+    EVE_cmd_text_burst(DATE_YEAR_X - 10, DATE_Y, FONT_TIME, 0, "-");
     EVE_cmd_text_burst(DATE_YEAR_X, DATE_Y, FONT_TIME, 0, current_date_view.year);
 
     EVE_cmd_number_burst(CLOCK_X1, CLOCK_Y, FONT_TIME, 0, current_date_view.hour0);
