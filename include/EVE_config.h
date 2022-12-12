@@ -424,7 +424,7 @@ typedef struct
 
 /* untested */
 /* 4D-Systems GEN4-FT81x-43xx 480x272 4.3",resistive or capacitive, FT812 / FT813 */
-#if defined (EVE_GEN4_FT81x_43)
+#if defined (EVE_GEN4_FT813_43)
 #define Resolution_480x272
 
 #define EVE_PCLK    (6L)
