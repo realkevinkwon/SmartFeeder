@@ -16,9 +16,9 @@ void solenoid_test() {
     while (1) {
         open_solenoid();
         ESP_LOGI(SOLENOID_TAG, "Solenoid Open");
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
         close_solenoid();
         ESP_LOGI(SOLENOID_TAG, "Solenoid Closed");
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }   
 }

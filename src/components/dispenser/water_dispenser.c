@@ -3,38 +3,78 @@
 // Tag for logging
 static const char *WATER_TAG = "Water Dispenser";
 
-hx711_t load_cell;
+hx711_t water_load_cell;
+// float prev_water_level = 0;
+// float water_consumed = 0;
 
 void water_dispenser_init() {
     solenoid_init();
-    load_cell = WATER_LC_init();
-    WATER_LC_calibration(load_cell);
+    water_load_cell = WATER_LC_init();
+    WATER_LC_calibration(water_load_cell);
+    // prev_water_level = get_water_level();
 }
 
 float get_water_level() {
-    return WATER_LC_to_grams(load_measure(load_cell));
+    return WATER_LC_to_grams(load_measure(water_load_cell));
 }
 
 void fill_water_to_amount(float amount) {
-    float target_amount = amount < WATER_BOWL_FULL_WEIGHT ? amount : WATER_BOWL_FULL_WEIGHT;
-    float amount_to_dispense = target_amount - get_water_level();
+    // Ensure we do not overfill the bowl
+    float target_level = amount < WATER_BOWL_FULL_WEIGHT ? amount : WATER_BOWL_FULL_WEIGHT;
+    float water_level = get_water_level();
 
-    // If the amount to dispense is less than the minimum water that can be dispensed at one time then return
-    if (amount_to_dispense < MIN_WATER_DISPENSED) {return;}
+    // Ensure that the bowl is present
+    if (water_level <= WATER_BOWL_MISSING_THRESHOLD) {
+        ESP_LOGI(WATER_TAG, "Bowl Missing!");
+        return;
+    }
 
-    // Determine how long the solenoid valve needs to be open
-    float open_time = (amount_to_dispense - MIN_WATER_DISPENSED) / WATER_PER_MS;
+    // Check if the water level is already at the target
+    if ((target_level - water_level) >= MIN_WATER_DISPENSED) {
+        ESP_LOGI(WATER_TAG, "Filling to %fg", target_level);
 
-    // Open the solenoid valve for the appropriate amount of time
-    open_solenoid();
-    vTaskDelay(open_time / portTICK_PERIOD_MS);
-    close_solenoid();
+        // Start dispensing water
+        int32_t attempts = 0;
+        float last_water_level;
+        open_solenoid();
+        while((target_level - water_level) >= MIN_WATER_DISPENSED) {
+            last_water_level = water_level;
+            water_level = get_water_level();
+
+            // Check that the bowl is still present
+            if (water_level <= WATER_BOWL_MISSING_THRESHOLD) {
+                ESP_LOGI(WATER_TAG, "Bowl Missing!");
+                break;
+            }
+
+            // Check that water is still being dispensed (ie: the reservoir is at a sufficient level)
+            if (water_level - last_water_level < MIN_WATER_DIFFERENCE) {
+                attempts++;
+                if (attempts > MAX_WATER_DISPENSE_ATTEMPTS) {
+                    ESP_LOGI(WATER_TAG, "Reservoir Empty!");
+                    break;
+                }
+            } else {
+                attempts = 0;
+            }
+
+            // Wait before checking again
+            vTaskDelay(WATER_OPEN_TIME / portTICK_PERIOD_MS);
+        }
+        // Stop dispensing water
+        close_solenoid();
+    }
+    ESP_LOGI(WATER_TAG, "Water at %fg", water_level);
+}
+
+void dispense_water_amount(float amount) {
+    fill_water_to_amount(get_water_level() + amount);
 }
 
 void water_dispenser_calibration() {
     float initial_level = get_water_level();
     open_solenoid();
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(WATER_OPEN_TIME / portTICK_PERIOD_MS);
     close_solenoid();
     float final_level = get_water_level();
     ESP_LOGI(WATER_TAG, "Amount Dispensed: %fg", final_level - initial_level);

@@ -75,6 +75,11 @@ void load_cell_test()
         int32_t lc2_meas = load_measure(load_cell_2);
         ESP_LOGI(LOAD_CELL_TAG, "LC1: %d   -   %fg", lc1_meas, lc1_to_grams(lc1_meas));
         ESP_LOGI(LOAD_CELL_TAG, "LC2: %d   -   %fg", lc2_meas, lc2_to_grams(lc2_meas));
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
+}
+
+void load_cell_dump() {
+    ESP_LOGI(LOAD_CELL_TAG, "lc1_cali_zero: %d", lc1_cali_zero);
+    ESP_LOGI(LOAD_CELL_TAG, "lc2_cali_zero: %d", lc2_cali_zero);
 }

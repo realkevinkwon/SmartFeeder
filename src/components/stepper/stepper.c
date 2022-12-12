@@ -16,6 +16,13 @@ void stepper_init() {
     gpio_set_direction(STEPPER_DIR_PIN, GPIO_MODE_OUTPUT);
 }
 
+void _one_step() {
+    gpio_set_level(STEPPER_STEP_PIN, 1);
+    vTaskDelay(STEP_PULSE_LENGTH / portTICK_PERIOD_MS);
+    gpio_set_level(STEPPER_STEP_PIN, 0);
+    vTaskDelay(STEP_RATE / portTICK_PERIOD_MS);
+}
+
 void step(int32_t num_steps, int32_t direction) {
     gpio_set_level(STEPPER_EN_PIN, 1);
     gpio_set_level(STEPPER_DIR_PIN, direction);
@@ -27,28 +34,20 @@ void step(int32_t num_steps, int32_t direction) {
     steps = step_modulo(steps);
 }
 
-void step_to(int32_t target) {
+void step_to(int32_t target, int32_t direction) {
     int32_t step_diff = step_modulo(target - steps);
-    int32_t step_diff_inv = STEPS_PER_REV - step_diff;
-    int32_t num_steps = step_diff <= step_diff_inv ? step_diff : step_diff_inv;
-    int32_t direction = step_diff <= step_diff_inv ? 0 : 1;
+    // If rotating counter-clockwise, then adjust num_steps
+    int32_t num_steps = direction ? STEPS_PER_REV - step_diff : step_diff;
     step(num_steps, direction);
-}
-
-void _one_step() {
-    gpio_set_level(STEPPER_STEP_PIN, 1);
-    vTaskDelay(STEP_PULSE_LENGTH / portTICK_PERIOD_MS);
-    gpio_set_level(STEPPER_STEP_PIN, 0);
-    vTaskDelay(STEP_RATE / portTICK_PERIOD_MS);
 }
 
 void stepper_test() {
     stepper_init();
     while (1) {
-        step_to_angle(90);
+        step_angle(45, 1);
         ESP_LOGI(STEPPER_TAG, "Step Count: %d", steps);
         vTaskDelay(100 / portTICK_PERIOD_MS);
-        step_to_angle(0);
+        step_angle(52.5, 0);
         ESP_LOGI(STEPPER_TAG, "Step Count: %d", steps);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }   
