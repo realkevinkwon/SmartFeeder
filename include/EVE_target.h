@@ -956,7 +956,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
         #if !defined (EVE_CS)
             #define EVE_PDN     GPIO_NUM_25
-            #define EVE_CS      GPIO_NUM_27
+            #define EVE_CS      GPIO_NUM_22
             #define EVE_MOSI    GPIO_NUM_13
             #define EVE_MISO    GPIO_NUM_12
             #define EVE_SCK     GPIO_NUM_14
@@ -965,7 +965,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
         extern spi_device_handle_t EVE_spi_device;
         extern spi_device_handle_t EVE_spi_device_simple;
 
-        #define EVE_DMA
+        // #define EVE_DMA
 
         void DELAY_MS(uint16_t ms);
 
