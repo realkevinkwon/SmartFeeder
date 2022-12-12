@@ -32,10 +32,12 @@ extern Date current_date;
 extern Date start_date;
 extern Date end_date;
 extern Date new_date;
+extern Date feed_date;
 extern DateView current_date_view;
 extern DateView start_date_view;
 extern DateView end_date_view;
 extern DateView new_date_view;
+extern DateView feed_date_view;
 
 void clock_init(void);
 void set_timezone(const char* new_timezone);

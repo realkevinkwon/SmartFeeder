@@ -36,6 +36,13 @@ Date new_date = {
     .hour = 0,
     .minute = 0,
 };
+Date feed_date = {
+    .year = 2022,
+    .month = 1,
+    .day = 1,
+    .hour = 0,
+    .minute = 0,
+};
 
 DateView current_date_view = {
     .year = {'2','0','2','2','\0'},
@@ -68,6 +75,16 @@ DateView end_date_view = {
     .suffix = {'A','M','\0'},
 };
 DateView new_date_view = {
+    .year = {'2','0','2','2','\0'},
+    .month = {'J','A','N','\0'},
+    .day = {'0','1','\0'},
+    .hour0 = 1,
+    .hour1 = 2,
+    .minute0 = 0,
+    .minute1 = 0,
+    .suffix = {'A','M','\0'},
+};
+DateView feed_date_view = {
     .year = {'2','0','2','2','\0'},
     .month = {'J','A','N','\0'},
     .day = {'0','1','\0'},
